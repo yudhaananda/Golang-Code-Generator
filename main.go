@@ -203,7 +203,7 @@ func createInput(items []string, name string, project string) {
 		"",
 		"type " + nameUpper + "Input struct {",
 	}
-	for i := 1; i < len(items)-3; i++ {
+	for i := 1; i < len(items)-5; i++ {
 		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
 	codes = append(codes, []string{
@@ -211,10 +211,10 @@ func createInput(items []string, name string, project string) {
 		"",
 		"type " + nameUpper + "EditInput struct {",
 	}...)
-	for i := 0; i < len(items)-4; i++ {
+	for i := 0; i < len(items)-6; i++ {
 		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
-	codes = append(codes, items[len(items)-2]+" `json:\""+strings.ToLower(strings.Split(items[len(items)-2], " ")[0])+"\" binding:\"required\"`")
+	codes = append(codes, items[len(items)-4]+" `json:\""+strings.ToLower(strings.Split(items[len(items)-4], " ")[0])+"\" binding:\"required\"`")
 	codes = append(codes, "}")
 
 	for _, code := range codes {
@@ -256,14 +256,14 @@ func createService(items []string, name string, project string) {
 
 	createItem := ""
 
-	for i := 1; i < len(items)-4; i++ {
+	for i := 1; i < len(items)-6; i++ {
 		createItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 	}
 
 	createItem += "\nCreatedDate: time.Now(),"
 
 	editItem := ""
-	for i := 0; i < len(items)-4; i++ {
+	for i := 0; i < len(items)-6; i++ {
 		editItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 	}
 	editItem += "CreatedBy: old" + nameUpper + ".CreatedBy,\n"
