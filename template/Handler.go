@@ -112,3 +112,21 @@ func (h *[name]Handler) Get[nameUpper]ById(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *[name]Handler) Delete[nameUpper](c *gin.Context) {
+	id := c.Param("id")
+
+	status, err := h.[name]Service.Delete[nameUpper](id)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Delete [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	response := helper.APIResponse("Delete [nameUpper] Success", http.StatusOK, "Success", status)
+
+	c.JSON(http.StatusOK, response)
+}

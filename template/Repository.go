@@ -11,6 +11,7 @@ type [nameUpper]Repository interface {
 	Edit([name] entity.[nameUpper]) (entity.[nameUpper], error)
 	FindById(id int) (entity.[nameUpper], error)
 	FindAll() ([]entity.[nameUpper], error)
+	Delete(id int) (string, error)
 }
 
 type [name]Repository struct {
@@ -44,7 +45,7 @@ func (r *[name]Repository) Edit([name] entity.[nameUpper]) (entity.[nameUpper], 
 func (r *[name]Repository) FindById(id int) (entity.[nameUpper], error) {
 	var [name] entity.[nameUpper]
 
-	err := r.db.Where("id = ?", id).Find(&[name]).Error
+	err := r.db.Where("id = ? AND DeletedDate = ?", id, nil).Find(&[name]).Error
 
 	if err != nil {
 		return [name], err
@@ -56,11 +57,27 @@ func (r *[name]Repository) FindById(id int) (entity.[nameUpper], error) {
 func (r *[name]Repository) FindAll() ([]entity.[nameUpper], error) {
 	var [name]s []entity.[nameUpper]
 
-	err := r.db.Find(&[name]s).Error
+	err := r.db.Where("DeletedDate = ?", nil).Find(&[name]s).Error
 
 	if err != nil {
 		return [name]s, err
 	}
 
 	return [name]s, nil
+}
+
+func (r *[name]Repository) Delete(id int) (string, error) {
+	[name], err := r.FindById(id)
+
+	if err != nil {
+		return "Failed", err
+	}
+
+	[name].DeletedDate = time.Now()
+	err = r.db.Save([name]).Error
+
+	if err != nil {
+		return "Failed", err
+	}
+	return "Success", nil
 }

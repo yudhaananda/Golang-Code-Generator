@@ -14,6 +14,8 @@ type [nameUpper]Service interface {
 	Edit[nameUpper](input input.[nameUpper]EditInput) (entity.[nameUpper], error)
 	Get[nameUpper]ById(id string) (entity.[nameUpper], error)
 	GetAll[nameUpper]() ([]entity.[nameUpper], error)
+	Delete[nameUpper](id string) (string, error)
+
 }
 
 type [name]Service struct {
@@ -90,4 +92,18 @@ func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
 	}
 
 	return [name]s, nil
+}
+
+func (s *[name]Service) Delete[nameUpper](id int) (string, error) {
+	idint, err := strconv.Atoi(id)
+
+	if err != nil {
+		return "Failed", err
+	}
+
+	result, err := s.[name]Repository.Delete(idint)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
 }

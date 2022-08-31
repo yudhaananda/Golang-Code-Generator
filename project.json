@@ -7,12 +7,18 @@
                     "CreatedBy string", 
                     "CreatedDate time.Time", 
                     "UpdatedBy string", 
-                    "UpdatedDate time.Time"],
+                    "UpdatedDate time.Time",
+                    "DeletedBy string",
+                    "DeletedDate time.Time"
+                ],
         "role" : ["Id int", 
                     "RoleName string", 
                     "CreatedBy string", 
                     "CreatedDate time.Time", 
                     "UpdatedBy string", 
-                    "UpdatedDate time.Time"]
+                    "UpdatedDate time.Time",
+                    "DeletedBy string",
+                    "DeletedDate time.Time"
+                ]
     }
 }
