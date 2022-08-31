@@ -1,0 +1,18 @@
+{
+    "projectName" : "testingproject",
+    "entity" : {
+        "city" : ["Id int", 
+                    "Nama string", 
+                    "Kode string", 
+                    "CreatedBy string", 
+                    "CreatedDate time.Time", 
+                    "UpdatedBy string", 
+                    "UpdatedDate time.Time"],
+        "role" : ["Id int", 
+                    "RoleName string", 
+                    "CreatedBy string", 
+                    "CreatedDate time.Time", 
+                    "UpdatedBy string", 
+                    "UpdatedDate time.Time"]
+    }
+}
