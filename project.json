@@ -19,6 +19,16 @@
                     "UpdatedDate time.Time",
                     "DeletedBy string",
                     "DeletedDate time.Time"
+                ],
+        "user" : ["Id int",
+                    "UserName string",
+                    "Password string",
+                    "RoleId int",
+                    "CreatedDate time.Time", 
+                    "UpdatedBy string", 
+                    "UpdatedDate time.Time",
+                    "DeletedBy string",
+                    "DeletedDate time.Time"
                 ]
     }
 }

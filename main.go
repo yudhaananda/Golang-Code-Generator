@@ -48,6 +48,10 @@ func main() {
 	createMain(objs, project)
 }
 
+// func createAuthService() {
+
+// }
+
 func createMain(objs map[string][]string, project string) {
 	err := os.MkdirAll(project, os.ModePerm)
 	if err != nil {
@@ -163,15 +167,76 @@ func createHandler(items []string, name string, project string) {
 		log.Fatal(err)
 	}
 
+	fileTemplateGetByHandler, err := os.ReadFile("template\\GetByHandler.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileTemplateHandlerConvert, err := os.ReadFile("template\\HandlerConvert.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	template := string(fileTemplate)
+	templateGetByHandler := string(fileTemplateGetByHandler)
+	templateHandlerConvert := string(fileTemplateHandlerConvert)
+	getByHandler := ""
 
 	names := strings.Split(name, "")
 	names[0] = strings.ToUpper(names[0])
 	nameUpper := strings.Join(names, "")
 
+	templateGetByHandler = strings.Replace(templateGetByHandler, "[name]", name, -1)
+	templateGetByHandler = strings.Replace(templateGetByHandler, "[nameUpper]", nameUpper, -1)
+	templateHandlerConvert = strings.Replace(templateHandlerConvert, "[nameUpper]", nameUpper, -1)
+
+	for i := 0; i < len(items)-6; i++ {
+		itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
+		itemSplit[0] = strings.ToLower(itemSplit[0])
+		itemLower := strings.Join(itemSplit, "")
+		typeSplit := strings.Split(strings.Split(items[i], " ")[1], "")
+		typeSplit[0] = strings.ToUpper(typeSplit[0])
+		type_ := strings.Join(typeSplit, "")
+		if strings.Contains(type_, "Float") {
+			type_ = "Float"
+		}
+
+		tempGetByHandler := ""
+
+		tempGetByHandler = strings.Replace(templateGetByHandler, "[item]", itemLower, -1)
+		tempGetByHandler = strings.Replace(tempGetByHandler, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
+		tempGetByHandler = strings.Replace(tempGetByHandler, "[type]", type_, -1)
+		if type_ == "String" {
+			tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower, -1)
+			tempGetByHandler = strings.Replace(tempGetByHandler, "[convert]", "", -1)
+		} else {
+			tempHandlerConvert := strings.Replace(templateHandlerConvert, "[itemParam]", itemLower+type_, -1)
+			tempHandlerConvert = strings.Replace(tempHandlerConvert, "[item]", itemLower, -1)
+			tempHandlerConvert = strings.Replace(tempHandlerConvert, "[type]", type_, -1)
+			if type_ == "Int" {
+				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 10, 64", -1)
+			}
+			if type_ == "Float64" {
+				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 64", -1)
+			}
+			if type_ == "Float32" {
+				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 32", -1)
+			}
+			if type_ == "Bool" {
+				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", "", -1)
+			}
+			tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower+type_, -1)
+			tempGetByHandler = strings.Replace(tempGetByHandler, "[convert]", tempHandlerConvert, -1)
+		}
+		getByHandler += tempGetByHandler + "\n"
+	}
+
 	template = strings.Replace(template, "[name]", name, -1)
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)
 	template = strings.Replace(template, "[project]", project, -1)
+	template = strings.Replace(template, "[getByHandler]", getByHandler, -1)
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
 		log.Fatal(err)
@@ -211,7 +276,7 @@ func createInput(items []string, name string, project string) {
 		"",
 		"type " + nameUpper + "EditInput struct {",
 	}...)
-	for i := 0; i < len(items)-6; i++ {
+	for i := 0; i < len(items)-5; i++ {
 		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
 	codes = append(codes, items[len(items)-4]+" `json:\""+strings.ToLower(strings.Split(items[len(items)-4], " ")[0])+"\" binding:\"required\"`")
@@ -248,7 +313,23 @@ func createService(items []string, name string, project string) {
 		log.Fatal(err)
 	}
 
+	fileTemplateGetByServiceMethod, err := os.ReadFile("template\\GetByServiceMethod.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileTemplateGetByService, err := os.ReadFile("template\\GetByService.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	template := string(fileTemplate)
+	templateGetByServiceMethod := string(fileTemplateGetByServiceMethod)
+	templateGetByService := string(fileTemplateGetByService)
+	getByServiceMethod := ""
+	getByService := ""
 
 	names := strings.Split(name, "")
 	names[0] = strings.ToUpper(names[0])
@@ -256,11 +337,31 @@ func createService(items []string, name string, project string) {
 
 	createItem := ""
 
+	templateGetByServiceMethod = strings.Replace(templateGetByServiceMethod, "[name]", name, -1)
+	templateGetByServiceMethod = strings.Replace(templateGetByServiceMethod, "[nameUpper]", nameUpper, -1)
+	templateGetByService = strings.Replace(templateGetByService, "[nameUpper]", nameUpper, -1)
+
 	for i := 1; i < len(items)-6; i++ {
+		itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
+		itemSplit[0] = strings.ToLower(itemSplit[0])
+		itemLower := strings.Join(itemSplit, "")
+		tempGetByServiceMethod := ""
+		tempGetByService := ""
+
 		createItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
+
+		tempGetByServiceMethod = strings.Replace(templateGetByServiceMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
+		tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+		tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[item]", itemLower, -1)
+		getByServiceMethod += tempGetByServiceMethod + "\n"
+
+		tempGetByService = strings.Replace(templateGetByService, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
+		tempGetByService = strings.Replace(tempGetByService, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+		getByService += tempGetByService + "\n"
 	}
 
-	createItem += "\nCreatedDate: time.Now(),"
+	createItem += "CreatedBy: userName,\n"
+	createItem += "CreatedDate: time.Now(),"
 
 	editItem := ""
 	for i := 0; i < len(items)-6; i++ {
@@ -268,13 +369,15 @@ func createService(items []string, name string, project string) {
 	}
 	editItem += "CreatedBy: old" + nameUpper + ".CreatedBy,\n"
 	editItem += "CreatedDate: old" + nameUpper + ".CreatedDate,\n"
-	editItem += "UpdatedBy: input.UpdatedBy,\n"
+	editItem += "UpdatedBy: userName,\n"
 
 	template = strings.Replace(template, "[name]", name, -1)
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)
 	template = strings.Replace(template, "[project]", project, -1)
 	template = strings.Replace(template, "[createItem]", createItem, -1)
 	template = strings.Replace(template, "[editItem]", editItem, -1)
+	template = strings.Replace(template, "[getBy]", getByService, -1)
+	template = strings.Replace(template, "[getByMethod]", getByServiceMethod, -1)
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
@@ -304,15 +407,63 @@ func createRepository(items []string, name string, project string) {
 		log.Fatal(err)
 	}
 
+	fileTemplateFindByRepoMethod, err := os.ReadFile("template\\FindByRepoMethod.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileTemplateFindByRepo, err := os.ReadFile("template\\FindByRepo.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	template := string(fileTemplate)
+	templateFindByMethod := string(fileTemplateFindByRepoMethod)
+	templateFindBy := string(fileTemplateFindByRepo)
+	findByMethod := ""
+	findBy := ""
 
 	names := strings.Split(name, "")
 	names[0] = strings.ToUpper(names[0])
 	nameUpper := strings.Join(names, "")
 
+	templateFindByMethod = strings.Replace(templateFindByMethod, "[name]", name, -1)
+	templateFindByMethod = strings.Replace(templateFindByMethod, "[nameUpper]", nameUpper, -1)
+	templateFindBy = strings.Replace(templateFindBy, "[nameUpper]", nameUpper, -1)
+
+	for i := 0; i < len(items)-6; i++ {
+		itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
+		itemSplit[0] = strings.ToLower(itemSplit[0])
+		itemLower := strings.Join(itemSplit, "")
+		for i := 0; i < len(itemSplit); i++ {
+			if itemSplit[i] == strings.ToUpper(itemSplit[i]) {
+				itemSplit[i] = "_" + strings.ToLower(itemSplit[i])
+			}
+		}
+		item_ := strings.Join(itemSplit, "")
+		tempFindByMethod := ""
+		tempFindBy := ""
+
+		tempFindByMethod = strings.Replace(templateFindByMethod, "[item]", itemLower, -1)
+		tempFindByMethod = strings.Replace(tempFindByMethod, "[item_]", item_, -1)
+		tempFindByMethod = strings.Replace(tempFindByMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
+		tempFindByMethod = strings.Replace(tempFindByMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+		findByMethod += tempFindByMethod
+
+		tempFindBy = strings.Replace(templateFindBy, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
+		tempFindBy = strings.Replace(tempFindBy, "[item]", itemLower, -1)
+		tempFindBy = strings.Replace(tempFindBy, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+		findBy += tempFindBy + "\n"
+	}
+
 	template = strings.Replace(template, "[name]", name, -1)
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)
 	template = strings.Replace(template, "[project]", project, -1)
+	template = strings.Replace(template, "[findByMethod]", findByMethod, -1)
+	template = strings.Replace(template, "[findBy]", findBy, -1)
+
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
 		log.Fatal(err)

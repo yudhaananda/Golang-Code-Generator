@@ -1,0 +1,1 @@
+Get[nameUpper]By[itemUpper]([itemParam]) (entity.[nameUpper], error)

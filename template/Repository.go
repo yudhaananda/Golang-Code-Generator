@@ -2,6 +2,7 @@ package repository
 
 import (
 	"[project]/entity"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -9,7 +10,7 @@ import (
 type [nameUpper]Repository interface {
 	Save([name] entity.[nameUpper]) (entity.[nameUpper], error)
 	Edit([name] entity.[nameUpper]) (entity.[nameUpper], error)
-	FindById(id int) (entity.[nameUpper], error)
+	[findBy]
 	FindAll() ([]entity.[nameUpper], error)
 	Delete(id int) (string, error)
 }
@@ -42,22 +43,12 @@ func (r *[name]Repository) Edit([name] entity.[nameUpper]) (entity.[nameUpper], 
 	return [name], nil
 }
 
-func (r *[name]Repository) FindById(id int) (entity.[nameUpper], error) {
-	var [name] entity.[nameUpper]
-
-	err := r.db.Where("id = ? AND DeletedDate = ?", id, nil).Find(&[name]).Error
-
-	if err != nil {
-		return [name], err
-	}
-
-	return [name], nil
-}
+[findByMethod]
 
 func (r *[name]Repository) FindAll() ([]entity.[nameUpper], error) {
 	var [name]s []entity.[nameUpper]
 
-	err := r.db.Where("DeletedDate = ?", nil).Find(&[name]s).Error
+	err := r.db.Where("deleted_date = ?", nil).Find(&[name]s).Error
 
 	if err != nil {
 		return [name]s, err

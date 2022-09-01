@@ -14,8 +14,8 @@ type [name]Handler struct {
 	jwtService  service.JwtService
 }
 
-func New[nameUpper]Handler([name]Service service.[nameUpper]Service) *[name]Handler {
-	return &[name]Handler{[name]Service}
+func New[nameUpper]Handler([name]Service service.[nameUpper]Service, jwtService service.JwtService) *[name]Handler {
+	return &[name]Handler{[name]Service, jwtService}
 }
 
 func (h *[name]Handler) Create[nameUpper](c *gin.Context) {
@@ -95,28 +95,22 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *[name]Handler) Get[nameUpper]ById(c *gin.Context) {
-	id := c.Param("id")
-
-	[name], err := h.[name]Service.Get[nameUpper]ById(id)
-
-	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-
-		response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	response := helper.APIResponse("Get [nameUpper] Success", http.StatusOK, "Success", [name])
-
-	c.JSON(http.StatusOK, response)
-}
+[getByHandler]
 
 func (h *[name]Handler) Delete[nameUpper](c *gin.Context) {
 	id := c.Param("id")
 
-	status, err := h.[name]Service.Delete[nameUpper](id)
+	idint, err := strconv.Atoi(id)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Delete [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	status, err := h.[name]Service.Delete[nameUpper](idint)
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}

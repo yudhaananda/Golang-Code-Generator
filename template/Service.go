@@ -12,7 +12,7 @@ import (
 type [nameUpper]Service interface {
 	Create[nameUpper](input input.[nameUpper]Input) (entity.[nameUpper], error)
 	Edit[nameUpper](input input.[nameUpper]EditInput) (entity.[nameUpper], error)
-	Get[nameUpper]ById(id string) (entity.[nameUpper], error)
+	[getBy]
 	GetAll[nameUpper]() ([]entity.[nameUpper], error)
 	Delete[nameUpper](id string) (string, error)
 
@@ -26,7 +26,7 @@ func New[nameUpper]Service([name]Repository repository.[nameUpper]Repository) *[
 	return &[name]Service{[name]Repository}
 }
 
-func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input) (entity.[nameUpper], error) {
+func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input, userName string) (entity.[nameUpper], error) {
 	[name] := entity.[nameUpper]{
 		[createItem]
 	}
@@ -40,7 +40,7 @@ func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input) (entity.
 	return new[nameUpper], nil
 }
 
-func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput) (entity.[nameUpper], error) {
+func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput, userName string) (entity.[nameUpper], error) {
 	old[nameUpper], err := s.[name]Repository.FindById(input.Id)
 
 	if err != nil {
@@ -60,25 +60,7 @@ func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput) (entit
 	return new[nameUpper], nil
 }
 
-func (s *[name]Service) Get[nameUpper]ById(id string) (entity.[nameUpper], error) {
-	idint, err := strconv.Atoi(id)
-
-	if err != nil {
-		return entity.[nameUpper]{}, err
-	}
-
-	[name], err := s.[name]Repository.FindById(idint)
-
-	if err != nil {
-		return [name], err
-	}
-
-	if [name].Id == 0 {
-		return [name], errors.New("[name] not found")
-	}
-
-	return [name], nil
-}
+[getByMethod]
 
 func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
 	[name]s, err := s.[name]Repository.FindAll()
@@ -95,13 +77,8 @@ func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
 }
 
 func (s *[name]Service) Delete[nameUpper](id int) (string, error) {
-	idint, err := strconv.Atoi(id)
 
-	if err != nil {
-		return "Failed", err
-	}
-
-	result, err := s.[name]Repository.Delete(idint)
+	result, err := s.[name]Repository.Delete(id)
 	if err != nil {
 		return result, err
 	}
