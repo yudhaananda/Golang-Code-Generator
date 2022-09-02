@@ -11,11 +11,10 @@ import (
 
 type [name]Handler struct {
 	[name]Service service.[nameUpper]Service
-	jwtService  service.JwtService
 }
 
-func New[nameUpper]Handler([name]Service service.[nameUpper]Service, jwtService service.JwtService) *[name]Handler {
-	return &[name]Handler{[name]Service, jwtService}
+func New[nameUpper]Handler([name]Service service.[nameUpper]Service) *[name]Handler {
+	return &[name]Handler{[name]Service}
 }
 
 func (h *[name]Handler) Create[nameUpper](c *gin.Context) {

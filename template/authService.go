@@ -57,24 +57,13 @@ func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 
 func (s *authService) Login(input input.LoginInput) (entity.User, error) {
 
-	user, err := s.userRepository.FindByNoPegawai(input.UserName)
+	user, err := s.userRepository.FindByUserName(input.UserName)
 
 	if err != nil {
 		return user, err
 	}
 	if user.Id == 0 {
-		input.UserName = helper.FormatNoHp(input.UserName)
-		user, err = s.userRepository.FindByNoHp(input.UserName)
-		if err != nil {
-			return user, err
-		}
-		if user.Id == 0 {
-			return user, errors.New("user with username " + input.UserName + " not found")
-		}
-	}
-
-	if !user.IsActive {
-		return user, errors.New("user is inactived by " + user.NonActivedBy)
+		return user, errors.New("user with username " + input.UserName + " not found")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))

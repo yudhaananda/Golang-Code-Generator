@@ -49,7 +49,6 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	router.GET("/", testHandler.TestAPI)
 	api := router.Group("/api/v1")
 	//auth
 	[apiArea]
