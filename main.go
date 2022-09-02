@@ -49,8 +49,69 @@ func main() {
 	}
 	createHelper(project)
 	createAuthHandler(project)
+	createFormatter(project)
+	createJwtService(project)
 	createMain(objs, project)
 }
+
+func createJwtService(project string) {
+	err := os.MkdirAll(project+"\\service\\", os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.Create(project + "\\service\\jwtService.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	fileTemplate, err := os.ReadFile("template\\jwtService.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	template := string(fileTemplate)
+
+	template = strings.Replace(template, "[project]", project, -1)
+
+	_, err = fmt.Fprintln(file, template)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func createFormatter(project string) {
+	err := os.MkdirAll(project+"\\formatter\\", os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file, err := os.Create(project + "\\formatter\\authFormatter.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	fileTemplate, err := os.ReadFile("template\\authFormatter.go")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	template := string(fileTemplate)
+
+	template = strings.Replace(template, "[project]", project, -1)
+
+	_, err = fmt.Fprintln(file, template)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func createAuthHandler(project string) {
 	err := os.MkdirAll(project+"\\handler\\", os.ModePerm)
 	if err != nil {
@@ -103,12 +164,12 @@ func createAuthService(items []string, project string) {
 
 	registerItem := ""
 
-	for i := 0; i < len(items)-6; i++ {
+	for i := 1; i < len(items)-6; i++ {
 		if strings.Split(items[i], " ")[0] != "Password" {
 			registerItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 		}
 	}
-	registerItem += "Password: password,\n"
+	registerItem += "Password: string(password),\n"
 	registerItem += "CreatedBy: input.UserName,\n"
 	registerItem += "CreatedDate: time.Now(),"
 
@@ -162,20 +223,23 @@ func createMain(objs map[string][]string, project string) {
 		varService := key + "Service"
 		serviceArea += varService + " := service.New" + keyUpper + "Service(" + varRepo + ")\n"
 		handlerArea += key + "Handler := handler.New" + keyUpper + "Handler(" + varService + ")\n"
-		apiArea += "api.POST(\"/create" + key + "\", " + key + "Handler.Create" + keyUpper + ")\n"
-		apiArea += "api.POST(\"/edit" + key + "\", " + key + "Handler.Edit" + keyUpper + ")\n"
-		apiArea += "api.GET(\"/getall" + key + "s\", " + key + "Handler.GetAll" + keyUpper + "s)\n"
+		apiArea += "api.POST(\"/create" + key + "\", authMiddleware(jwtService, userService), " + key + "Handler.Create" + keyUpper + ")\n"
+		apiArea += "api.POST(\"/edit" + key + "\", authMiddleware(jwtService, userService), " + key + "Handler.Edit" + keyUpper + ")\n"
+		apiArea += "api.GET(\"/getall" + key + "s\", authMiddleware(jwtService, userService), " + key + "Handler.GetAll" + keyUpper + "s)\n"
 		if key == "user" {
 			serviceArea += "authService := service.NewAuthService(userRepository)\n"
-			handlerArea += "authHandler := service.NewAuthHandler(authService)\n"
+			serviceArea += "jwtService := service.NewJwtService()\n"
+			handlerArea += "authHandler := handler.NewAuthHandler(authService, jwtService)\n"
 			apiArea += "api.POST(\"/register\", authHandler.RegisterUser)\n"
 			apiArea += "api.POST(\"/login\", authHandler.Login)\n"
 		}
 		for i := 0; i < len(items)-6; i++ {
 			itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
-			itemSplit[0] = strings.ToLower(itemSplit[0])
-			itemLower := strings.Join(itemSplit, "")
-			apiArea += "api.GET(\"/get" + key + "by" + strings.ToLower(itemLower) + "/:" + itemLower + "\", " + key + "Handler.Get" + keyUpper + "By" + strings.Split(items[i], " ")[0] + ")\n"
+			if strings.Split(items[i], " ")[0] != "Password" {
+				itemSplit[0] = strings.ToLower(itemSplit[0])
+				itemLower := strings.Join(itemSplit, "")
+				apiArea += "api.GET(\"/get" + key + "by" + strings.ToLower(itemLower) + "/:" + itemLower + "\", authMiddleware(jwtService, userService), " + key + "Handler.Get" + keyUpper + "By" + strings.Split(items[i], " ")[0] + ")\n"
+			}
 		}
 	}
 
@@ -296,15 +360,19 @@ func createHandler(items []string, name string, project string) {
 				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[item]", itemLower, -1)
 				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[type]", type_, -1)
 				if type_ == "Int" {
-					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 10, 64", -1)
+					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "Atoi", -1)
+					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", "", -1)
 				}
 				if type_ == "Float64" {
+					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseFloat", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 64", -1)
 				}
 				if type_ == "Float32" {
+					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseFloat", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 32", -1)
 				}
 				if type_ == "Bool" {
+					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseBool", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", "", -1)
 				}
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower+type_, -1)
@@ -433,13 +501,22 @@ func createService(items []string, name string, project string) {
 	templateGetByService = strings.Replace(templateGetByService, "[nameUpper]", nameUpper, -1)
 
 	for i := 1; i < len(items)-6; i++ {
+		createItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
+	}
+
+	createItem += "CreatedBy: userName,\n"
+	createItem += "CreatedDate: time.Now(),"
+
+	editItem := ""
+	for i := 0; i < len(items)-6; i++ {
+		editItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 		itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
 		itemSplit[0] = strings.ToLower(itemSplit[0])
 		itemLower := strings.Join(itemSplit, "")
 		tempGetByServiceMethod := ""
 		tempGetByService := ""
+
 		if itemLower != "password" {
-			createItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 
 			tempGetByServiceMethod = strings.Replace(templateGetByServiceMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 			tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
@@ -450,14 +527,6 @@ func createService(items []string, name string, project string) {
 			tempGetByService = strings.Replace(tempGetByService, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
 			getByService += tempGetByService + "\n"
 		}
-	}
-
-	createItem += "CreatedBy: userName,\n"
-	createItem += "CreatedDate: time.Now(),"
-
-	editItem := ""
-	for i := 0; i < len(items)-6; i++ {
-		editItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 	}
 	editItem += "CreatedBy: old" + nameUpper + ".CreatedBy,\n"
 	editItem += "CreatedDate: old" + nameUpper + ".CreatedDate,\n"
@@ -548,6 +617,7 @@ func createRepository(items []string, name string, project string) {
 			tempFindBy = strings.Replace(templateFindBy, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 			tempFindBy = strings.Replace(tempFindBy, "[item]", itemLower, -1)
 			tempFindBy = strings.Replace(tempFindBy, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+			fmt.Println(itemLower + " " + strings.Split(items[i], " ")[1])
 			findBy += tempFindBy + "\n"
 		}
 	}

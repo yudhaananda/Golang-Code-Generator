@@ -10,11 +10,11 @@ import (
 )
 
 type [nameUpper]Service interface {
-	Create[nameUpper](input input.[nameUpper]Input) (entity.[nameUpper], error)
-	Edit[nameUpper](input input.[nameUpper]EditInput) (entity.[nameUpper], error)
+	Create[nameUpper](input input.[nameUpper]Input, userName string) (entity.[nameUpper], error)
+	Edit[nameUpper](input input.[nameUpper]EditInput, userName string) (entity.[nameUpper], error)
 	[getBy]
 	GetAll[nameUpper]() ([]entity.[nameUpper], error)
-	Delete[nameUpper](id string) (string, error)
+	Delete[nameUpper](id int) (string, error)
 
 }
 

@@ -6,7 +6,7 @@ func (s *[name]Service) Get[nameUpper]By[itemUpper]([itemParam]) (entity.[nameUp
 		return [name], err
 	}
 
-	if [name].[itemUpper] == 0 {
+	if [name].Id == 0 {
 		return [name], errors.New("[name] not found")
 	}
 

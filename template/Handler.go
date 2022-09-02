@@ -32,7 +32,18 @@ func (h *[name]Handler) Create[nameUpper](c *gin.Context) {
 		return
 	}
 
-	[name], err := h.[name]Service.Create[nameUpper](input)
+	userLogin, ok := c.Get("currentUser")
+	if !ok {
+		errors := helper.FormatValidationError(err)
+
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Edit [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	[name], err := h.[name]Service.Create[nameUpper](input, userLogin.(entity.User).UserName)
 
 	if err != nil {
 
@@ -62,7 +73,18 @@ func (h *[name]Handler) Edit[nameUpper](c *gin.Context) {
 		return
 	}
 
-	[name], err := h.[name]Service.Edit[nameUpper](input)
+	userLogin, ok := c.Get("currentUser")
+	if !ok {
+		errors := helper.FormatValidationError(err)
+
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Edit [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	[name], err := h.[name]Service.Edit[nameUpper](input, userLogin.(entity.User).UserName)
 
 	if err != nil {
 

@@ -1,1 +1,1 @@
-FindBy[itemUpper]([item] int) (entity.[nameUpper], error)
+FindBy[itemUpper]([itemParam]) (entity.[nameUpper], error)

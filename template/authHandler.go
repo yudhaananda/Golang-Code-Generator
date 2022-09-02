@@ -43,8 +43,20 @@ func (h *authHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("account has been registered successfully", http.StatusOK, "success", newProfile)
+	token, err := h.jwtService.GenerateToken(newProfile.Id, newProfile.UserName)
 
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Login Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formatter := formatter.FormatUser(newProfile, token)
+
+	response := helper.APIResponse("account has been registered successfully", http.StatusOK, "success", formatter)
+	
 	c.JSON(http.StatusOK, response)
 }
 
@@ -73,7 +85,7 @@ func (h *authHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.jwtService.GenerateToken(loggedinUser.Id)
+	token, err := h.jwtService.GenerateToken(loggedinUser.Id, loggedinUser.UserName)
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}

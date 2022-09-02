@@ -33,7 +33,7 @@ func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 		return entity.User{}, errors.New("error find user")
 	}
 
-	if checkUser.UserName != 0 {
+	if checkUser.Id != 0 {
 		return entity.User{}, errors.New("UserName sudah pernah diinputkan")
 	}
 

@@ -56,3 +56,49 @@ func main() {
 	router.Run()
 
 }
+
+func authMiddleware(jwtService service.JwtService, userService service.UserService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authheader := c.GetHeader("Authorization")
+
+		if !strings.Contains(authheader, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		tokenString := ""
+		arrayToken := strings.Split(authheader, " ")
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
+
+		token, err := jwtService.ValidateToken(tokenString)
+
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		claim, ok := token.Claims.(jwt.MapClaims)
+
+		if !ok || !token.Valid {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		userId := int(claim["user_id"].(float64))
+
+		user, err := userService.GetUserById(userId)
+
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		c.Set("currentUser", user)
+	}
+}

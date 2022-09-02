@@ -1,4 +1,4 @@
-[itemParam],err := strconv.Parse[type]([item][param])
+[itemParam],err := strconv.[parseType]([item][param])
 	
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
