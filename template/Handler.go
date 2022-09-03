@@ -131,7 +131,18 @@ func (h *[name]Handler) Delete[nameUpper](c *gin.Context) {
 		return
 	}
 
-	status, err := h.[name]Service.Delete[nameUpper](idint)
+	userLogin, ok := c.Get("currentUser")
+	if !ok {
+		errors := helper.FormatValidationError(err)
+
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Edit [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	status, err := h.[name]Service.Delete[nameUpper](idint, userLogin.(entity.User).UserName)
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}

@@ -226,6 +226,7 @@ func createMain(objs map[string][]string, project string) {
 		apiArea += "api.POST(\"/create" + key + "\", authMiddleware(jwtService, userService), " + key + "Handler.Create" + keyUpper + ")\n"
 		apiArea += "api.POST(\"/edit" + key + "\", authMiddleware(jwtService, userService), " + key + "Handler.Edit" + keyUpper + ")\n"
 		apiArea += "api.GET(\"/getall" + key + "s\", authMiddleware(jwtService, userService), " + key + "Handler.GetAll" + keyUpper + "s)\n"
+		apiArea += "api.GET(\"/delete" + key + "/:id\", authMiddleware(jwtService, userService), " + key + "Handler.Delete" + keyUpper + ")\n"
 		if key == "user" {
 			serviceArea += "authService := service.NewAuthService(userRepository)\n"
 			serviceArea += "jwtService := service.NewJwtService()\n"

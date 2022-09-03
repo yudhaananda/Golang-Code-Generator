@@ -14,7 +14,7 @@ type [nameUpper]Service interface {
 	Edit[nameUpper](input input.[nameUpper]EditInput, userName string) (entity.[nameUpper], error)
 	[getBy]
 	GetAll[nameUpper]() ([]entity.[nameUpper], error)
-	Delete[nameUpper](id int) (string, error)
+	Delete[nameUpper](id int, userName string) (entity.[nameUpper], error)
 
 }
 
@@ -76,9 +76,14 @@ func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
 	return [name]s, nil
 }
 
-func (s *[name]Service) Delete[nameUpper](id int) (string, error) {
-
-	result, err := s.[name]Repository.Delete(id)
+func (s *[name]Service) Delete[nameUpper](id int, userName string) (entity.[nameUpper], error) {
+	[name], err := s.Get[nameUpper]ById(id)
+	if err != nil {
+		return [name], err
+	}
+	[name].DeletedDate = time.Now()
+	[name].DeletedBy = userName
+	result, err := s.[name]Repository.Edit([name])
 	if err != nil {
 		return result, err
 	}
