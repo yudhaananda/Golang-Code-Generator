@@ -1,41 +1,81 @@
 package main
 
 import (
+	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	objs := map[string][]string{}
+	router := gin.Default()
 
-	content, err := os.ReadFile("project.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var jsonContent map[string]interface{}
-	err = json.Unmarshal(content, &jsonContent)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	projectObject := jsonContent["projectName"]
-	entity := jsonContent["entity"]
-
-	project := strings.ToLower(fmt.Sprintf("%v", projectObject))
-
-	for key, obj := range entity.(map[string]interface{}) {
-		temp := []string{}
-		for _, val := range obj.([]interface{}) {
-			temp = append(temp, val.(string))
+	router.GET("/", func(ctx *gin.Context) {
+		html, err := os.ReadFile("index.html")
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
 		}
-		objs[key] = temp
-	}
+		ctx.Data(http.StatusOK, "text/html; charset=utf-8", html)
+	})
+	router.POST("/generate", func(ctx *gin.Context) {
+
+		content, err := ctx.FormFile("file")
+
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			return
+		}
+
+		file, err := content.Open()
+
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			return
+		}
+		defer file.Close()
+
+		data, err := ioutil.ReadAll(file)
+
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			return
+		}
+
+		var jsonContent map[string]interface{}
+		err = json.Unmarshal(data, &jsonContent)
+
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			return
+		}
+
+		objs := map[string][]string{}
+
+		projectObject := jsonContent["projectName"]
+		entity := jsonContent["entity"]
+
+		project := strings.ToLower(fmt.Sprintf("%v", projectObject))
+
+		for key, obj := range entity.(map[string]interface{}) {
+			temp := []string{}
+			for _, val := range obj.([]interface{}) {
+				temp = append(temp, val.(string))
+			}
+			objs[key] = temp
+		}
+		ctx.Data(http.StatusOK, "Application/zip", process(objs, project))
+	})
+	router.Run()
+}
+
+func process(objs map[string][]string, project string) []byte {
 
 	for key, obj := range objs {
 		if key == "user" {
@@ -52,6 +92,74 @@ func main() {
 	createFormatter(project)
 	createJwtService(project)
 	createMain(objs, project)
+
+	return zipping(project)
+}
+
+func zipping(project string) []byte {
+	baseFolder := project
+
+	zipName, err := os.Create(project + ".zip")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer zipName.Close()
+
+	w := zip.NewWriter(zipName)
+
+	addFiles(w, baseFolder, "")
+
+	err = w.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	zipFile, err := os.ReadFile(project + ".zip")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return zipFile
+}
+
+func addFiles(w *zip.Writer, basePath, baseInZip string) {
+	// Open the Directory
+	files, err := ioutil.ReadDir(basePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, file := range files {
+		// fmt.Println(basePath + file.Name())
+		if !file.IsDir() {
+			dat, err := ioutil.ReadFile(basePath + file.Name())
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			// Add some files to the archive.
+			var f io.Writer
+			if baseInZip != "" {
+				f, err = w.Create(baseInZip + "/" + file.Name())
+			} else {
+				f, err = w.Create(file.Name())
+			}
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, err = f.Write(dat)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else if file.IsDir() {
+
+			newBase := basePath + "/" + file.Name()
+
+			addFiles(w, newBase, file.Name())
+		}
+	}
 }
 
 func createJwtService(project string) {
