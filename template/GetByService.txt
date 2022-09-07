@@ -1,1 +1,1 @@
-Get[nameUpper]By[itemUpper]([itemParam]) (entity.[nameUpper], error)
+Get[nameUpper]By[itemUpper]([itemParam]) ([]entity.[nameUpper], error)

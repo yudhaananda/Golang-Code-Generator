@@ -41,11 +41,13 @@ func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input, userName
 }
 
 func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput, userName string) (entity.[nameUpper], error) {
-	old[nameUpper], err := s.[name]Repository.FindById(input.Id)
-
+	old[nameUpper]s, err := s.[name]Repository.FindById(input.Id)
+	
 	if err != nil {
-		return old[nameUpper], err
+		return entity.[nameUpper]{}, err
 	}
+
+	old[nameUpper]:= old[nameUpper]s[0]
 
 	[name] := entity.[nameUpper]{
 		[editItem]
@@ -77,10 +79,18 @@ func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
 }
 
 func (s *[name]Service) Delete[nameUpper](id int, userName string) (entity.[nameUpper], error) {
-	[name], err := s.Get[nameUpper]ById(id)
+	[name]s, err := s.Get[nameUpper]ById(id)
+	
 	if err != nil {
-		return [name], err
+		return entity.[nameUpper]{}, err
 	}
+
+	if len([name]s) == 0 {
+		return entity.[nameUpper]{}, errors.New("[nameUpper] Not Found")
+	}
+
+	[name] := [name]s[0]
+
 	[name].DeletedDate = time.Now()
 	[name].DeletedBy = userName
 	result, err := s.[name]Repository.Edit([name])

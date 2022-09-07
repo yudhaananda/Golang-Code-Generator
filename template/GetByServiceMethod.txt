@@ -1,4 +1,4 @@
-func (s *[name]Service) Get[nameUpper]By[itemUpper]([itemParam]) (entity.[nameUpper], error) {
+func (s *[name]Service) Get[nameUpper]By[itemUpper]([itemParam]) ([]entity.[nameUpper], error) {
 
 	[name], err := s.[name]Repository.FindBy[itemUpper]([item])
 
@@ -6,7 +6,7 @@ func (s *[name]Service) Get[nameUpper]By[itemUpper]([itemParam]) (entity.[nameUp
 		return [name], err
 	}
 
-	if [name].Id == 0 {
+	if len([name]) == 0 {
 		return [name], errors.New("[name] not found")
 	}
 

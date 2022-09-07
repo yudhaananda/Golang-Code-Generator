@@ -33,7 +33,7 @@ func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 		return entity.User{}, errors.New("error find user")
 	}
 
-	if checkUser.Id != 0 {
+	if len(checkUser) != 0 {
 		return entity.User{}, errors.New("UserName sudah pernah diinputkan")
 	}
 
@@ -57,14 +57,16 @@ func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 
 func (s *authService) Login(input input.LoginInput) (entity.User, error) {
 
-	user, err := s.userRepository.FindByUserName(input.UserName)
+	users, err := s.userRepository.FindByUserName(input.UserName)
 
 	if err != nil {
-		return user, err
+		return entity.User{}, err
 	}
-	if user.Id == 0 {
-		return user, errors.New("user with username " + input.UserName + " not found")
+	if len(users) == 0 {
+		return entity.User{}, errors.New("user with username " + input.UserName + " not found")
 	}
+
+	user := users[0]
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password))
 
