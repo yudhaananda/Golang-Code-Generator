@@ -91,13 +91,14 @@ func authMiddleware(jwtService service.JwtService, userService service.UserServi
 
 		userId := int(claim["user_id"].(float64))
 
-		user, err := userService.GetUserById(userId)
+		users, err := userService.GetUserById(userId)
 
 		if err != nil {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
+		user := users[0]
 
 		c.Set("currentUser", user)
 	}
