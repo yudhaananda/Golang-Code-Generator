@@ -153,7 +153,7 @@ func delete(project string) error {
 }
 
 func zipping(project string) ([]byte, error) {
-	baseFolder := project
+	baseFolder := project + "/"
 
 	zipName, err := os.Create(project + ".zip")
 
@@ -165,7 +165,7 @@ func zipping(project string) ([]byte, error) {
 
 	w := zip.NewWriter(zipName)
 
-	addFiles(w, baseFolder, "")
+	addFiles(w, baseFolder)
 
 	err = w.Close()
 	if err != nil {
@@ -180,7 +180,7 @@ func zipping(project string) ([]byte, error) {
 	return zipFile, nil
 }
 
-func addFiles(w *zip.Writer, basePath, baseInZip string) {
+func addFiles(w *zip.Writer, basePath string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
 	if err != nil {
@@ -197,11 +197,8 @@ func addFiles(w *zip.Writer, basePath, baseInZip string) {
 
 			// Add some files to the archive.
 			var f io.Writer
-			if baseInZip != "" {
-				f, err = w.Create(baseInZip + "/" + file.Name())
-			} else {
-				f, err = w.Create(file.Name())
-			}
+			f, err = w.Create(basePath + file.Name())
+
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -209,11 +206,12 @@ func addFiles(w *zip.Writer, basePath, baseInZip string) {
 			if err != nil {
 				fmt.Println(err)
 			}
+			fmt.Println(basePath + file.Name())
 		} else if file.IsDir() {
 
-			newBase := basePath + "/" + file.Name()
+			newBase := basePath + file.Name() + "/"
 
-			addFiles(w, newBase, file.Name())
+			addFiles(w, newBase)
 		}
 	}
 }
