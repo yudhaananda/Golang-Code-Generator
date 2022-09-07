@@ -528,19 +528,19 @@ func createHandler(items []string, name string, project string) error {
 				tempHandlerConvert := strings.Replace(templateHandlerConvert, "[itemParam]", itemLower+type_, -1)
 				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[item]", itemLower, -1)
 				tempHandlerConvert = strings.Replace(tempHandlerConvert, "[type]", type_, -1)
-				if type_ == "Int" {
+				if strings.Contains(strings.Split(items[i], " ")[1], "int") {
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "Atoi", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", "", -1)
 				}
-				if type_ == "Float64" {
+				if strings.Contains(strings.Split(items[i], " ")[1], "float64") {
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseFloat", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 64", -1)
 				}
-				if type_ == "Float32" {
+				if strings.Contains(strings.Split(items[i], " ")[1], "float32") {
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseFloat", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", ", 32", -1)
 				}
-				if type_ == "Bool" {
+				if strings.Contains(strings.Split(items[i], " ")[1], "bool") {
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseBool", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", "", -1)
 				}
@@ -587,7 +587,7 @@ func createInput(items []string, name string, project string) error {
 		"",
 		"type " + nameUpper + "Input struct {",
 	}
-	for i := 1; i < len(items)-5; i++ {
+	for i := 1; i < len(items)-6; i++ {
 		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
 	codes = append(codes, []string{
@@ -595,10 +595,9 @@ func createInput(items []string, name string, project string) error {
 		"",
 		"type " + nameUpper + "EditInput struct {",
 	}...)
-	for i := 0; i < len(items)-5; i++ {
+	for i := 0; i < len(items)-6; i++ {
 		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
-	codes = append(codes, items[len(items)-4]+" `json:\""+strings.ToLower(strings.Split(items[len(items)-4], " ")[0])+"\" binding:\"required\"`")
 	codes = append(codes, "}")
 	if name == "user" {
 		codes = append(codes, []string{
