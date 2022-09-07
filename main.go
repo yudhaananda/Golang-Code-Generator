@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -70,51 +69,96 @@ func main() {
 			}
 			objs[key] = temp
 		}
-		ctx.Data(http.StatusOK, "Application/zip", process(objs, project))
+		result, err := process(objs, project)
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			return
+		}
+		ctx.Data(http.StatusOK, "Application/zip", result)
 	})
 	router.Run()
 }
 
-func process(objs map[string][]string, project string) []byte {
+func process(objs map[string][]string, project string) ([]byte, error) {
 
 	for key, obj := range objs {
 		if key == "user" {
-			createAuthService(obj, project)
+			err := createAuthService(obj, project)
+			if err != nil {
+				return nil, err
+			}
 		}
-		createEntity(obj, key, project)
-		createRepository(obj, key, project)
-		createService(obj, key, project)
-		createInput(obj, key, project)
-		createHandler(obj, key, project)
+		err := createEntity(obj, key, project)
+		if err != nil {
+			return nil, err
+		}
+		err = createRepository(obj, key, project)
+		if err != nil {
+			return nil, err
+		}
+		err = createService(obj, key, project)
+		if err != nil {
+			return nil, err
+		}
+		err = createInput(obj, key, project)
+		if err != nil {
+			return nil, err
+		}
+		err = createHandler(obj, key, project)
+		if err != nil {
+			return nil, err
+		}
 	}
-	createHelper(project)
-	createAuthHandler(project)
-	createFormatter(project)
-	createJwtService(project)
-	createMain(objs, project)
-	result := zipping(project)
-	delete(project)
-	return result
+	err := createHelper(project)
+	if err != nil {
+		return nil, err
+	}
+	err = createAuthHandler(project)
+	if err != nil {
+		return nil, err
+	}
+	err = createFormatter(project)
+	if err != nil {
+		return nil, err
+	}
+	err = createJwtService(project)
+	if err != nil {
+		return nil, err
+	}
+	err = createMain(objs, project)
+	if err != nil {
+		return nil, err
+	}
+	result, err := zipping(project)
+	if err != nil {
+		return nil, err
+	}
+	err = delete(project)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func delete(project string) {
+func delete(project string) error {
 	err := os.RemoveAll(project)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	err = os.Remove(project + ".zip")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func zipping(project string) []byte {
+func zipping(project string) ([]byte, error) {
 	baseFolder := project
 
 	zipName, err := os.Create(project + ".zip")
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	defer zipName.Close()
@@ -125,15 +169,15 @@ func zipping(project string) []byte {
 
 	err = w.Close()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	zipFile, err := os.ReadFile(project + ".zip")
 
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return zipFile
+	return zipFile, nil
 }
 
 func addFiles(w *zip.Writer, basePath, baseInZip string) {
@@ -174,23 +218,23 @@ func addFiles(w *zip.Writer, basePath, baseInZip string) {
 	}
 }
 
-func createJwtService(project string) {
+func createJwtService(project string) error {
 	err := os.MkdirAll(project+"\\service\\", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\service\\jwtService.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 
 	fileTemplate, err := os.ReadFile("template\\jwtService.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -199,27 +243,28 @@ func createJwtService(project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func createFormatter(project string) {
+func createFormatter(project string) error {
 	err := os.MkdirAll(project+"\\formatter\\", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\formatter\\authFormatter.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 
 	fileTemplate, err := os.ReadFile("template\\authFormatter.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -228,27 +273,28 @@ func createFormatter(project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func createAuthHandler(project string) {
+func createAuthHandler(project string) error {
 	err := os.MkdirAll(project+"\\handler\\", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\handler\\authHandler.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 
 	fileTemplate, err := os.ReadFile("template\\authHandler.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -257,27 +303,28 @@ func createAuthHandler(project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func createAuthService(items []string, project string) {
+func createAuthService(items []string, project string) error {
 	err := os.MkdirAll(project+"\\service\\", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\service\\authService.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 
 	fileTemplate, err := os.ReadFile("template\\authService.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -298,20 +345,21 @@ func createAuthService(items []string, project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func createMain(objs map[string][]string, project string) {
+func createMain(objs map[string][]string, project string) error {
 	err := os.MkdirAll(project, os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\main.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -319,7 +367,7 @@ func createMain(objs map[string][]string, project string) {
 	fileTemplate, err := os.ReadFile("template\\main.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	migrateArea := ""
@@ -375,53 +423,55 @@ func createMain(objs map[string][]string, project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Println("Main Created")
+	return nil
 }
 
-func createHelper(project string) {
+func createHelper(project string) error {
 	err := os.MkdirAll(project+"\\helper", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\helper\\helper.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
 	copy, err := os.Open("template\\helper.txt")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
 
 	_, err = io.Copy(file, copy)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = file.Sync()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func createHandler(items []string, name string, project string) {
+func createHandler(items []string, name string, project string) error {
 	err := os.MkdirAll(project+"\\handler", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\handler\\" + name + "Handler.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -429,19 +479,19 @@ func createHandler(items []string, name string, project string) {
 	fileTemplate, err := os.ReadFile("template\\Handler.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileTemplateGetByHandler, err := os.ReadFile("template\\GetByHandler.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileTemplateHandlerConvert, err := os.ReadFile("template\\HandlerConvert.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -509,22 +559,23 @@ func createHandler(items []string, name string, project string) {
 	template = strings.Replace(template, "[getByHandler]", getByHandler, -1)
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Println(name + " Handler Created")
+	return nil
 }
 
-func createInput(items []string, name string, project string) {
+func createInput(items []string, name string, project string) error {
 	err := os.MkdirAll(project+"\\input", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\input\\" + name + "Input.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -565,24 +616,25 @@ func createInput(items []string, name string, project string) {
 	for _, code := range codes {
 		_, err := fmt.Fprintln(file, code)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 	}
 
 	fmt.Println(name + " Input Created")
+	return nil
 }
 
-func createService(items []string, name string, project string) {
+func createService(items []string, name string, project string) error {
 	err := os.MkdirAll(project+"\\service", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\service\\" + name + "Service.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -590,19 +642,19 @@ func createService(items []string, name string, project string) {
 	fileTemplate, err := os.ReadFile("template\\Service.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileTemplateGetByServiceMethod, err := os.ReadFile("template\\GetByServiceMethod.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileTemplateGetByService, err := os.ReadFile("template\\GetByService.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -663,22 +715,23 @@ func createService(items []string, name string, project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Println(name + " Service Created")
+	return nil
 }
 
-func createRepository(items []string, name string, project string) {
+func createRepository(items []string, name string, project string) error {
 	err := os.MkdirAll(project+"\\repository", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\repository\\" + name + "Repository.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -686,19 +739,19 @@ func createRepository(items []string, name string, project string) {
 	fileTemplate, err := os.ReadFile("template\\Repository.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileTemplateFindByRepoMethod, err := os.ReadFile("template\\FindByRepoMethod.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fileTemplateFindByRepo, err := os.ReadFile("template\\FindByRepo.txt")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	template := string(fileTemplate)
@@ -751,22 +804,23 @@ func createRepository(items []string, name string, project string) {
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	fmt.Println(name + " repository Created")
+	return nil
 }
 
-func createEntity(items []string, name string, project string) {
+func createEntity(items []string, name string, project string) error {
 	err := os.MkdirAll(project+"\\entity", os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	file, err := os.Create(project + "\\entity\\" + name + "Entity.go")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	defer file.Close()
@@ -793,9 +847,10 @@ func createEntity(items []string, name string, project string) {
 	for _, code := range codes {
 		_, err := fmt.Fprintln(file, code)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 	}
 	fmt.Println(name + " entity Created")
+	return nil
 }
