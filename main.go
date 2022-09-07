@@ -92,8 +92,20 @@ func process(objs map[string][]string, project string) []byte {
 	createFormatter(project)
 	createJwtService(project)
 	createMain(objs, project)
+	result := zipping(project)
+	delete(project)
+	return result
+}
 
-	return zipping(project)
+func delete(project string) {
+	err := os.RemoveAll(project)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.Remove(project + ".zip")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func zipping(project string) []byte {
