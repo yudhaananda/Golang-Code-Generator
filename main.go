@@ -19,7 +19,7 @@ func main() {
 	router.GET("/", func(ctx *gin.Context) {
 		html, err := os.ReadFile("index.html")
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 		}
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", html)
 	})
@@ -28,14 +28,14 @@ func main() {
 		content, err := ctx.FormFile("file")
 
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
 		}
 
 		file, err := content.Open()
 
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
 		}
 		defer file.Close()
@@ -43,7 +43,7 @@ func main() {
 		data, err := ioutil.ReadAll(file)
 
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
 		}
 
@@ -51,7 +51,7 @@ func main() {
 		err = json.Unmarshal(data, &jsonContent)
 
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
 		}
 
@@ -71,7 +71,7 @@ func main() {
 		}
 		result, err := process(objs, project)
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(""))
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
 		}
 		ctx.Data(http.StatusOK, "Application/zip", result)

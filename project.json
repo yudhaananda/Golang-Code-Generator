@@ -16,6 +16,7 @@
                     "DeletedDate time.Time"
                 ],
         "balance": ["Id int",
+                    "userId int",
                     "Value float64",
                     "Tipe string",
                     "Description string",
@@ -28,6 +29,7 @@
                     "DeletedBy string",
                     "DeletedDate time.Time"],
         "budget":["Id int",
+                    "userId int",
                     "Value float64",
                     "Tipe string",
                     "Description string",
