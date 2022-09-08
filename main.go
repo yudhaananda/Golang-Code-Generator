@@ -411,7 +411,7 @@ func createMain(objs map[string][]string, project string) error {
 		}
 		for i := 0; i < len(items)-6; i++ {
 			itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
-			if strings.Split(items[i], " ")[0] != "Password" {
+			if strings.Split(items[i], " ")[0] != "Password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
 				itemSplit[0] = strings.ToLower(itemSplit[0])
 				itemLower := strings.Join(itemSplit, "")
 				apiArea += "api.GET(\"/get" + key + "by" + strings.ToLower(itemLower) + "/:" + itemLower + "\", authMiddleware(jwtService, userService), " + key + "Handler.Get" + keyUpper + "By" + strings.Split(items[i], " ")[0] + ")\n"
@@ -526,7 +526,7 @@ func createHandler(items []string, name string, project string) error {
 		}
 
 		tempGetByHandler := ""
-		if itemLower != "password" {
+		if itemLower != "password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
 			tempGetByHandler = strings.Replace(templateGetByHandler, "[item]", itemLower, -1)
 			tempGetByHandler = strings.Replace(tempGetByHandler, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 			tempGetByHandler = strings.Replace(tempGetByHandler, "[type]", type_, -1)
