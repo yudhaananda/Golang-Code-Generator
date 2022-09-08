@@ -217,19 +217,19 @@ func addFiles(w *zip.Writer, basePath string) {
 }
 
 func createJwtService(project string) error {
-	err := os.MkdirAll(project+"\\service\\", os.ModePerm)
+	err := os.MkdirAll(project+"/service/", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\service\\jwtService.go")
+	file, err := os.Create(project + "/service/jwtService.go")
 
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\jwtService.txt")
+	fileTemplate, err := os.ReadFile("template/jwtService.txt")
 
 	if err != nil {
 		return err
@@ -247,19 +247,19 @@ func createJwtService(project string) error {
 }
 
 func createFormatter(project string) error {
-	err := os.MkdirAll(project+"\\formatter\\", os.ModePerm)
+	err := os.MkdirAll(project+"/formatter/", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\formatter\\authFormatter.go")
+	file, err := os.Create(project + "/formatter/authFormatter.go")
 
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\authFormatter.txt")
+	fileTemplate, err := os.ReadFile("template/authFormatter.txt")
 
 	if err != nil {
 		return err
@@ -277,19 +277,19 @@ func createFormatter(project string) error {
 }
 
 func createAuthHandler(project string) error {
-	err := os.MkdirAll(project+"\\handler\\", os.ModePerm)
+	err := os.MkdirAll(project+"/handler/", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\handler\\authHandler.go")
+	file, err := os.Create(project + "/handler/authHandler.go")
 
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\authHandler.txt")
+	fileTemplate, err := os.ReadFile("template/authHandler.txt")
 
 	if err != nil {
 		return err
@@ -307,19 +307,19 @@ func createAuthHandler(project string) error {
 }
 
 func createAuthService(items []string, project string) error {
-	err := os.MkdirAll(project+"\\service\\", os.ModePerm)
+	err := os.MkdirAll(project+"/service/", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\service\\authService.go")
+	file, err := os.Create(project + "/service/authService.go")
 
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\authService.txt")
+	fileTemplate, err := os.ReadFile("template/authService.txt")
 
 	if err != nil {
 		return err
@@ -354,7 +354,7 @@ func createMain(objs map[string][]string, project string) error {
 		return err
 	}
 
-	file, err := os.Create(project + "\\main.go")
+	file, err := os.Create(project + "/main.go")
 
 	if err != nil {
 		return err
@@ -362,7 +362,7 @@ func createMain(objs map[string][]string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\main.txt")
+	fileTemplate, err := os.ReadFile("template/main.txt")
 
 	if err != nil {
 		return err
@@ -429,19 +429,19 @@ func createMain(objs map[string][]string, project string) error {
 }
 
 func createHelper(project string) error {
-	err := os.MkdirAll(project+"\\helper", os.ModePerm)
+	err := os.MkdirAll(project+"/helper", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\helper\\helper.go")
+	file, err := os.Create(project + "/helper/helper.go")
 
 	if err != nil {
 		return err
 	}
 
 	defer file.Close()
-	copy, err := os.Open("template\\helper.txt")
+	copy, err := os.Open("template/helper.txt")
 	if err != nil {
 		return err
 	}
@@ -461,12 +461,12 @@ func createHelper(project string) error {
 }
 
 func createHandler(items []string, name string, project string) error {
-	err := os.MkdirAll(project+"\\handler", os.ModePerm)
+	err := os.MkdirAll(project+"/handler", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\handler\\" + name + "Handler.go")
+	file, err := os.Create(project + "/handler/" + name + "Handler.go")
 
 	if err != nil {
 		return err
@@ -474,19 +474,19 @@ func createHandler(items []string, name string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\Handler.txt")
+	fileTemplate, err := os.ReadFile("template/Handler.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateGetByHandler, err := os.ReadFile("template\\GetByHandler.txt")
+	fileTemplateGetByHandler, err := os.ReadFile("template/GetByHandler.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateHandlerConvert, err := os.ReadFile("template\\HandlerConvert.txt")
+	fileTemplateHandlerConvert, err := os.ReadFile("template/HandlerConvert.txt")
 
 	if err != nil {
 		return err
@@ -565,12 +565,12 @@ func createHandler(items []string, name string, project string) error {
 }
 
 func createInput(items []string, name string, project string) error {
-	err := os.MkdirAll(project+"\\input", os.ModePerm)
+	err := os.MkdirAll(project+"/input", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\input\\" + name + "Input.go")
+	file, err := os.Create(project + "/input/" + name + "Input.go")
 
 	if err != nil {
 		return err
@@ -623,12 +623,12 @@ func createInput(items []string, name string, project string) error {
 }
 
 func createService(items []string, name string, project string) error {
-	err := os.MkdirAll(project+"\\service", os.ModePerm)
+	err := os.MkdirAll(project+"/service", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\service\\" + name + "Service.go")
+	file, err := os.Create(project + "/service/" + name + "Service.go")
 
 	if err != nil {
 		return err
@@ -636,19 +636,19 @@ func createService(items []string, name string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\Service.txt")
+	fileTemplate, err := os.ReadFile("template/Service.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateGetByServiceMethod, err := os.ReadFile("template\\GetByServiceMethod.txt")
+	fileTemplateGetByServiceMethod, err := os.ReadFile("template/GetByServiceMethod.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateGetByService, err := os.ReadFile("template\\GetByService.txt")
+	fileTemplateGetByService, err := os.ReadFile("template/GetByService.txt")
 
 	if err != nil {
 		return err
@@ -720,12 +720,12 @@ func createService(items []string, name string, project string) error {
 }
 
 func createRepository(items []string, name string, project string) error {
-	err := os.MkdirAll(project+"\\repository", os.ModePerm)
+	err := os.MkdirAll(project+"/repository", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\repository\\" + name + "Repository.go")
+	file, err := os.Create(project + "/repository/" + name + "Repository.go")
 
 	if err != nil {
 		return err
@@ -733,19 +733,19 @@ func createRepository(items []string, name string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\Repository.txt")
+	fileTemplate, err := os.ReadFile("template/Repository.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateFindByRepoMethod, err := os.ReadFile("template\\FindByRepoMethod.txt")
+	fileTemplateFindByRepoMethod, err := os.ReadFile("template/FindByRepoMethod.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateFindByRepo, err := os.ReadFile("template\\FindByRepo.txt")
+	fileTemplateFindByRepo, err := os.ReadFile("template/FindByRepo.txt")
 
 	if err != nil {
 		return err
@@ -809,12 +809,12 @@ func createRepository(items []string, name string, project string) error {
 }
 
 func createEntity(items []string, name string, project string) error {
-	err := os.MkdirAll(project+"\\entity", os.ModePerm)
+	err := os.MkdirAll(project+"/entity", os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(project + "\\entity\\" + name + "Entity.go")
+	file, err := os.Create(project + "/entity/" + name + "Entity.go")
 
 	if err != nil {
 		return err
