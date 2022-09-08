@@ -76,6 +76,15 @@ func main() {
 		}
 		ctx.Data(http.StatusOK, "Application/zip", result)
 	})
+	router.POST("/template.json", func(ctx *gin.Context) {
+		template, err := os.ReadFile("project.json")
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+			return
+		}
+		ctx.Data(http.StatusOK, "Application/file", template)
+
+	})
 	router.Run()
 }
 
