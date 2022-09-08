@@ -21,7 +21,7 @@
                     "Tipe string",
                     "Description string",
                     "Date time.Time",
-                    "IsExpanse bool",
+                    "IsExpense bool",
                     "CreatedBy string",
                     "CreatedDate time.Time", 
                     "UpdatedBy string", 

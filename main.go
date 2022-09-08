@@ -20,6 +20,7 @@ func main() {
 		html, err := os.ReadFile("index.html")
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+			return
 		}
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", html)
 	})
@@ -229,7 +230,7 @@ func createJwtService(project string) error {
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\jwtService.txt")
+	fileTemplate, err := os.ReadFile("jwtService.txt")
 
 	if err != nil {
 		return err
@@ -259,7 +260,7 @@ func createFormatter(project string) error {
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\authFormatter.txt")
+	fileTemplate, err := os.ReadFile("authFormatter.txt")
 
 	if err != nil {
 		return err
@@ -289,7 +290,7 @@ func createAuthHandler(project string) error {
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\authHandler.txt")
+	fileTemplate, err := os.ReadFile("authHandler.txt")
 
 	if err != nil {
 		return err
@@ -319,7 +320,7 @@ func createAuthService(items []string, project string) error {
 	}
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\authService.txt")
+	fileTemplate, err := os.ReadFile("authService.txt")
 
 	if err != nil {
 		return err
@@ -362,7 +363,7 @@ func createMain(objs map[string][]string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\main.txt")
+	fileTemplate, err := os.ReadFile("main.txt")
 
 	if err != nil {
 		return err
@@ -441,7 +442,7 @@ func createHelper(project string) error {
 	}
 
 	defer file.Close()
-	copy, err := os.Open("template\\helper.txt")
+	copy, err := os.Open("helper.txt")
 	if err != nil {
 		return err
 	}
@@ -474,19 +475,19 @@ func createHandler(items []string, name string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\Handler.txt")
+	fileTemplate, err := os.ReadFile("Handler.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateGetByHandler, err := os.ReadFile("template\\GetByHandler.txt")
+	fileTemplateGetByHandler, err := os.ReadFile("GetByHandler.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateHandlerConvert, err := os.ReadFile("template\\HandlerConvert.txt")
+	fileTemplateHandlerConvert, err := os.ReadFile("HandlerConvert.txt")
 
 	if err != nil {
 		return err
@@ -636,19 +637,19 @@ func createService(items []string, name string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\Service.txt")
+	fileTemplate, err := os.ReadFile("Service.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateGetByServiceMethod, err := os.ReadFile("template\\GetByServiceMethod.txt")
+	fileTemplateGetByServiceMethod, err := os.ReadFile("GetByServiceMethod.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateGetByService, err := os.ReadFile("template\\GetByService.txt")
+	fileTemplateGetByService, err := os.ReadFile("GetByService.txt")
 
 	if err != nil {
 		return err
@@ -733,19 +734,19 @@ func createRepository(items []string, name string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template\\Repository.txt")
+	fileTemplate, err := os.ReadFile("Repository.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateFindByRepoMethod, err := os.ReadFile("template\\FindByRepoMethod.txt")
+	fileTemplateFindByRepoMethod, err := os.ReadFile("FindByRepoMethod.txt")
 
 	if err != nil {
 		return err
 	}
 
-	fileTemplateFindByRepo, err := os.ReadFile("template\\FindByRepo.txt")
+	fileTemplateFindByRepo, err := os.ReadFile("FindByRepo.txt")
 
 	if err != nil {
 		return err
