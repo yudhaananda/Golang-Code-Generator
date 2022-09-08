@@ -1,5 +1,5 @@
 {
-    "projectName" : "mywallet",
+    "projectName" : "testApp",
     "entity" : {
         "user" : ["Id int",
                     "UserName string",
@@ -14,31 +14,7 @@
                     "UpdatedDate time.Time",
                     "DeletedBy string",
                     "DeletedDate time.Time"
-                ],
-        "balance": ["Id int",
-                    "UserId int",
-                    "Value float64",
-                    "Tipe string",
-                    "Description string",
-                    "Date time.Time",
-                    "IsExpense bool",
-                    "CreatedBy string",
-                    "CreatedDate time.Time", 
-                    "UpdatedBy string", 
-                    "UpdatedDate time.Time",
-                    "DeletedBy string",
-                    "DeletedDate time.Time"],
-        "budget":["Id int",
-                    "UserId int",
-                    "Value float64",
-                    "Tipe string",
-                    "Description string",
-                    "CreatedBy string",
-                    "CreatedDate time.Time", 
-                    "UpdatedBy string", 
-                    "UpdatedDate time.Time",
-                    "DeletedBy string",
-                    "DeletedDate time.Time"]
+                ]
         
     }
 }
