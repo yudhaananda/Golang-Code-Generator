@@ -23,6 +23,13 @@ func main() {
 		}
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", html)
 	})
+	router.GET("/favicon.ico", func(ctx *gin.Context) {
+		png, err := os.ReadFile("favicon.ico")
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+		}
+		ctx.Data(http.StatusOK, "text/html; charset=utf-8", png)
+	})
 	router.POST("/generate", func(ctx *gin.Context) {
 
 		content, err := ctx.FormFile("file")

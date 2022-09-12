@@ -4,12 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="icon" href="favicon.ico">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <style>
+      body {
+        background-color: #302e2f;
+      }
+      </style>
     <title>Generate</title>
   </head>
   <body>
     <center>
-      <h1>Golang Web API Generator Using Gin Framework</h1>
+      <h1 style="color: white;">Golang Web API Generator Using Gin Framework</h1>
       <form
         id="form"
         enctype="multipart/form-data"
@@ -18,12 +24,12 @@
       >
         <input class="form-control form-control-sm" type="file" name="file" accept="application/json" />
         <br/>
-          <button type ="button" class="btn btn-primary btn-sm" type="submit">Submit</button>
-        </form>      
-        <br/>
-        <br/>
-        <h5>Template Example</h5>
-        <form
+        <button type ="button" class="btn btn-primary btn-sm" type="submit">Submit</button>
+      </form>      
+      <br/>
+      <br/>
+      <h5 style="color: white;">Template Example</h5>
+      <form
         id="form2"
         enctype="multipart/form-data"
         action="/template.json"
@@ -31,7 +37,9 @@
         >
         <!-- <input class="input file-input" type="file" name="file" accept="application/json" multiple /> -->
         <button type="button" class="btn btn-primary btn-sm" type="submit">Download</button>
-      </form>
+    </form>
+      <br/>
+      <img src="favicon.ico">
     </center>
   </body>
 </html>
