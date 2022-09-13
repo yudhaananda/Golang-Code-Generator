@@ -91,6 +91,20 @@ func authMiddleware(jwtService service.JwtService, userService service.UserServi
 
 		userId := int(claim["user_id"].(float64))
 
+		dateTime, err := time.Parse(time.RFC3339Nano, claim["time"].(string))
+
+		if err != nil {
+			response := helper.APIResponse("Error Parse Date", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		if dateTime.Before(time.Now()) {
+			response := helper.APIResponse("Session End", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
 		users, err := userService.GetUserById(userId)
 
 		if err != nil {
