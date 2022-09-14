@@ -280,7 +280,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
 		apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaEdit]", -1)
-		apiArea += strings.Replace(loop, "[item]", "api.GET(\"/getall"+key+"\")\n", -1)
+		apiArea += strings.Replace(loop, "[item]", "api.GET(\"/getall"+key+"s\")\n", -1)
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
 		apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
