@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -145,6 +146,10 @@ func process(objs map[string][]string, project string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = createApiListHtml(objs, project)
+	if err != nil {
+		return nil, err
+	}
 	result, err := zipping(project)
 	if err != nil {
 		return nil, err
@@ -230,6 +235,101 @@ func addFiles(w *zip.Writer, basePath string) {
 			addFiles(w, newBase)
 		}
 	}
+}
+
+func createApiListHtml(objs map[string][]string, project string) error {
+
+	err := os.MkdirAll(project, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(project + "/index.html")
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	fileTemplate, err := os.ReadFile("template/index.txt")
+
+	if err != nil {
+		return err
+	}
+
+	templateLoop, err := os.ReadFile("template/indexLoop.txt")
+
+	if err != nil {
+		return err
+	}
+
+	template := string(fileTemplate)
+	loop := string(templateLoop)
+
+	apiArea := ""
+	count := 0
+
+	for key, items := range objs {
+
+		apiArea += strings.Replace(loop, "[item]", "api.POST(\"/create"+key+"\")\n", -1)
+		count += 1
+		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+		apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaCreate]", -1)
+		apiArea += strings.Replace(loop, "[item]", "api.POST(\"/edit"+key+"\")\n", -1)
+		count += 1
+		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+		apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaEdit]", -1)
+		apiArea += strings.Replace(loop, "[item]", "api.GET(\"/getall"+key+"\")\n", -1)
+		count += 1
+		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+		apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
+		apiArea += strings.Replace(loop, "[item]", "api.GET(\"/delete"+key+"/:id\")\n", -1)
+		count += 1
+		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+		apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
+		if key == "user" {
+			apiArea += strings.Replace(loop, "[item]", "api.POST(\"/register\")\n", -1)
+			count += 1
+			apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+			apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaRegister]", -1)
+			apiArea += strings.Replace(loop, "[item]", "api.POST(\"/login\")\n", -1)
+			count += 1
+			apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+			apiArea = strings.Replace(apiArea, "[jsonArea]", "{\"username\" : string\n <br> \"password\" : string}", -1)
+		}
+		jsonAreaCreate := "<p><b>Json Request</b></p>\n{"
+		jsonAreaEdit := "<p><b>Json Request</b></p>\n{"
+		for i := 0; i < len(items)-6; i++ {
+			itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
+			if strings.Split(items[i], " ")[0] != "Password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
+				itemSplit[0] = strings.ToLower(itemSplit[0])
+				itemLower := strings.Join(itemSplit, "")
+				apiArea += strings.Replace(loop, "[item]", "api.GET(\"/get"+key+"by"+strings.ToLower(itemLower)+"/:"+itemLower+"\")\n", -1)
+				count += 1
+				apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
+				apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
+			}
+			if i != 0 {
+				jsonAreaCreate += "\"" + strings.ToLower(strings.Split(items[i], " ")[0]) + "\" : " + strings.Split(items[i], " ")[1] + "<br>\n"
+			}
+			jsonAreaEdit += "\"" + strings.ToLower(strings.Split(items[i], " ")[0]) + "\" : " + strings.Split(items[i], " ")[1] + "<br>\n"
+		}
+		jsonAreaCreate += "}"
+		jsonAreaEdit += "}"
+		if key == "user" {
+			apiArea = strings.Replace(apiArea, "[jsonAreaRegister]", jsonAreaCreate, -1)
+		}
+		apiArea = strings.Replace(apiArea, "[jsonAreaEdit]", jsonAreaEdit, -1)
+		apiArea = strings.Replace(apiArea, "[jsonAreaCreate]", jsonAreaCreate, -1)
+	}
+	template = strings.Replace(template, "[itemLoop]", apiArea, -1)
+
+	_, err = fmt.Fprintln(file, template)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func createJwtService(project string) error {
@@ -378,7 +478,7 @@ func createMain(objs map[string][]string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template/main.txt")
+	fileTemplate, err := os.ReadFile("template/index.txt")
 
 	if err != nil {
 		return err

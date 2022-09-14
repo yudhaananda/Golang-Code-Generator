@@ -50,7 +50,15 @@ func main() {
 	}))
 
 	api := router.Group("/api/v1")
-	//auth
+	
+	api.GET("/", func(ctx *gin.Context) {
+		html, err := os.ReadFile("index.html")
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+		}
+		ctx.Data(http.StatusOK, "text/html; charset=utf-8", html)
+	})
+
 	[apiArea]
 
 	router.Run()
