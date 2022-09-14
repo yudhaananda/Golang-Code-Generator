@@ -296,7 +296,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 			apiArea += strings.Replace(loop, "[item]", "api.POST(\"/login\")\n", -1)
 			count += 1
 			apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
-			apiArea = strings.Replace(apiArea, "[jsonArea]", "{\"username\" : string\n <br> \"password\" : string}", -1)
+			apiArea = strings.Replace(apiArea, "[jsonArea]", "<p><b>Json Request</b></p>\n{\"username\" : string\n <br> \"password\" : string}", -1)
 		}
 		jsonAreaCreate := "<p><b>Json Request</b></p>\n{"
 		jsonAreaEdit := "<p><b>Json Request</b></p>\n{"
