@@ -478,7 +478,7 @@ func createMain(objs map[string][]string, project string) error {
 
 	defer file.Close()
 
-	fileTemplate, err := os.ReadFile("template/index.txt")
+	fileTemplate, err := os.ReadFile("template/main.txt")
 
 	if err != nil {
 		return err
@@ -790,7 +790,7 @@ func createService(items []string, name string, project string) error {
 		createItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 	}
 
-	createItem += "CreatedBy: userName,\n"
+	createItem += "CreatedBy: userLogin.UserName,\n"
 	createItem += "CreatedDate: time.Now(),"
 
 	editItem := ""
@@ -816,7 +816,7 @@ func createService(items []string, name string, project string) error {
 	}
 	editItem += "CreatedBy: old" + nameUpper + ".CreatedBy,\n"
 	editItem += "CreatedDate: old" + nameUpper + ".CreatedDate,\n"
-	editItem += "UpdatedBy: userName,\n"
+	editItem += "UpdatedBy: userLogin.UserName,\n"
 
 	template = strings.Replace(template, "[name]", name, -1)
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)

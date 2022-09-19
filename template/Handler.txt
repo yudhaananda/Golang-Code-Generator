@@ -43,7 +43,7 @@ func (h *[name]Handler) Create[nameUpper](c *gin.Context) {
 		return
 	}
 
-	[name], err := h.[name]Service.Create[nameUpper](input, userLogin.(entity.User).UserName)
+	[name], err := h.[name]Service.Create[nameUpper](input, userLogin.(entity.User))
 
 	if err != nil {
 
@@ -84,7 +84,7 @@ func (h *[name]Handler) Edit[nameUpper](c *gin.Context) {
 		return
 	}
 
-	[name], err := h.[name]Service.Edit[nameUpper](input, userLogin.(entity.User).UserName)
+	[name], err := h.[name]Service.Edit[nameUpper](input, userLogin.(entity.User))
 
 	if err != nil {
 
@@ -142,7 +142,7 @@ func (h *[name]Handler) Delete[nameUpper](c *gin.Context) {
 		return
 	}
 
-	status, err := h.[name]Service.Delete[nameUpper](idint, userLogin.(entity.User).UserName)
+	status, err := h.[name]Service.Delete[nameUpper](idint, userLogin.(entity.User))
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}

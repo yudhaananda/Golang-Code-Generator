@@ -10,11 +10,11 @@ import (
 )
 
 type [nameUpper]Service interface {
-	Create[nameUpper](input input.[nameUpper]Input, userName string) (entity.[nameUpper], error)
-	Edit[nameUpper](input input.[nameUpper]EditInput, userName string) (entity.[nameUpper], error)
+	Create[nameUpper](input input.[nameUpper]Input, userLogin entity.User) (entity.[nameUpper], error)
+	Edit[nameUpper](input input.[nameUpper]EditInput, userLogin entity.User) (entity.[nameUpper], error)
 	[getBy]
 	GetAll[nameUpper]() ([]entity.[nameUpper], error)
-	Delete[nameUpper](id int, userName string) (entity.[nameUpper], error)
+	Delete[nameUpper](id int, userLogin entity.User) (entity.[nameUpper], error)
 
 }
 
@@ -26,7 +26,7 @@ func New[nameUpper]Service([name]Repository repository.[nameUpper]Repository) *[
 	return &[name]Service{[name]Repository}
 }
 
-func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input, userName string) (entity.[nameUpper], error) {
+func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input, userLogin entity.User) (entity.[nameUpper], error) {
 	[name] := entity.[nameUpper]{
 		[createItem]
 	}
@@ -40,7 +40,7 @@ func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input, userName
 	return new[nameUpper], nil
 }
 
-func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput, userName string) (entity.[nameUpper], error) {
+func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput, userLogin entity.User) (entity.[nameUpper], error) {
 	old[nameUpper]s, err := s.[name]Repository.FindById(input.Id)
 	
 	if err != nil {
@@ -78,7 +78,7 @@ func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
 	return [name]s, nil
 }
 
-func (s *[name]Service) Delete[nameUpper](id int, userName string) (entity.[nameUpper], error) {
+func (s *[name]Service) Delete[nameUpper](id int, userLogin entity.User) (entity.[nameUpper], error) {
 	[name]s, err := s.Get[nameUpper]ById(id)
 	
 	if err != nil {
@@ -92,7 +92,7 @@ func (s *[name]Service) Delete[nameUpper](id int, userName string) (entity.[name
 	[name] := [name]s[0]
 
 	[name].DeletedDate = time.Now()
-	[name].DeletedBy = userName
+	[name].DeletedBy = userLogin.UserName
 	result, err := s.[name]Repository.Edit([name])
 	if err != nil {
 		return result, err
