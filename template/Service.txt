@@ -86,7 +86,7 @@ func (s *[name]Service) Delete[nameUpper](id int, userLogin entity.User) (entity
 	}
 
 	if len([name]s) == 0 {
-		return entity.[nameUpper]{}, errors.New("[nameUpper] Not Found")
+		return entity.[nameUpper]{}, errors.New("[name] not found")
 	}
 
 	[name] := [name]s[0]
