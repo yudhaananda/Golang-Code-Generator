@@ -47,7 +47,7 @@ func (r *[name]Repository) Edit([name] entity.[nameUpper]) (entity.[nameUpper], 
 func (r *[name]Repository) FindAll() ([]entity.[nameUpper], error) {
 	var [name]s []entity.[nameUpper]
 
-	err := r.db.Where("deleted_by = ?", "").Find(&[name]s).Error
+	err := r.db.Where("deleted_by = ?", "")[preload].Find(&[name]s).Error
 
 	if err != nil {
 		return [name]s, err

@@ -1,20 +1,33 @@
 {
-    "projectName" : "testApp",
-    "entity" : {
-        "user" : ["Id int",
-                    "UserName string",
-                    "Password string",
-                    "Email string",
-                    "FullName string",
-                    "Photo string",
-                    "Telephone string",
-                    "CreatedBy string",
-                    "CreatedDate time.Time", 
-                    "UpdatedBy string", 
-                    "UpdatedDate time.Time",
-                    "DeletedBy string",
-                    "DeletedDate time.Time"
-                ]
-        
-    }
+    "projectName": "testApp",
+    "entity": {
+        "user": ["Id int",
+            "UserName string",
+            "Password string",
+            "Email string",
+            "FullName string",
+            "Photo string",
+            "Telephone string",
+            "CreatedBy string",
+            "CreatedDate time.Time",
+            "UpdatedBy string",
+            "UpdatedDate time.Time",
+            "DeletedBy string",
+            "DeletedDate time.Time"
+        ],
+        "role": ["Id int",
+            "RoleName string",
+            "CreatedBy string",
+            "CreatedDate time.Time",
+            "UpdatedBy string",
+            "UpdatedDate time.Time",
+            "DeletedBy string",
+            "DeletedDate time.Time"
+        ]
+    },
+    "relation": [{
+        "table1": "role",
+        "table2": "user",
+        "relationName": "1M"
+    }]
 }

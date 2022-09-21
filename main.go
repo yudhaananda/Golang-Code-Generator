@@ -65,10 +65,21 @@ func main() {
 
 		objs := map[string][]string{}
 
+		relation := []map[string]string{}
+
 		projectObject := jsonContent["projectName"]
 		entity := jsonContent["entity"]
+		relationObject := jsonContent["relation"]
 
 		project := strings.ToLower(fmt.Sprintf("%v", projectObject))
+
+		for _, obj := range relationObject.([]interface{}) {
+			temp := map[string]string{}
+			for key, val := range obj.(map[string]interface{}) {
+				temp[key] = val.(string)
+			}
+			relation = append(relation, temp)
+		}
 
 		for key, obj := range entity.(map[string]interface{}) {
 			temp := []string{}
@@ -77,7 +88,7 @@ func main() {
 			}
 			objs[key] = temp
 		}
-		result, err := process(objs, project)
+		result, err := process(objs, project, relation)
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
@@ -96,35 +107,37 @@ func main() {
 	router.Run()
 }
 
-func process(objs map[string][]string, project string) ([]byte, error) {
+func process(objs map[string][]string, project string, relation []map[string]string) ([]byte, error) {
 
 	for key, obj := range objs {
+
+		objNew, err := createEntity(obj, key, project, relation)
+		if err != nil {
+			return nil, err
+		}
 		if key == "user" {
-			err := createAuthService(obj, project)
+			err := createAuthService(objNew, project)
 			if err != nil {
 				return nil, err
 			}
 		}
-		err := createEntity(obj, key, project)
+		err = createRepository(objNew, key, project, obj)
 		if err != nil {
 			return nil, err
 		}
-		err = createRepository(obj, key, project)
+		err = createService(objNew, key, project)
 		if err != nil {
 			return nil, err
 		}
-		err = createService(obj, key, project)
+		err = createInput(objNew, key, project)
 		if err != nil {
 			return nil, err
 		}
-		err = createInput(obj, key, project)
+		err = createHandler(objNew, key, project)
 		if err != nil {
 			return nil, err
 		}
-		err = createHandler(obj, key, project)
-		if err != nil {
-			return nil, err
-		}
+		objs[key] = objNew
 	}
 	err := createHelper(project)
 	if err != nil {
@@ -704,7 +717,8 @@ func createInput(items []string, name string, project string) error {
 		"type " + nameUpper + "Input struct {",
 	}
 	for i := 1; i < len(items)-6; i++ {
-		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
+		temp := strings.Split(items[i], " ")
+		codes = append(codes, temp[0]+" "+temp[1]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
 	codes = append(codes, []string{
 		"}",
@@ -712,7 +726,8 @@ func createInput(items []string, name string, project string) error {
 		"type " + nameUpper + "EditInput struct {",
 	}...)
 	for i := 0; i < len(items)-6; i++ {
-		codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
+		temp := strings.Split(items[i], " ")
+		codes = append(codes, temp[0]+" "+temp[1]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 	}
 	codes = append(codes, "}")
 	if name == "user" {
@@ -835,7 +850,7 @@ func createService(items []string, name string, project string) error {
 	return nil
 }
 
-func createRepository(items []string, name string, project string) error {
+func createRepository(items []string, name string, project string, itemCompares []string) error {
 	err := os.MkdirAll(project+"/repository", os.ModePerm)
 	if err != nil {
 		return err
@@ -876,9 +891,15 @@ func createRepository(items []string, name string, project string) error {
 	names := strings.Split(name, "")
 	names[0] = strings.ToUpper(names[0])
 	nameUpper := strings.Join(names, "")
+	diference := len(items) - len(itemCompares)
+	preload := ""
+	for i := len(items) - 6 - diference; i < len(items)-6; i++ {
+		preload += ".Preload(\"" + strings.Split(items[i], " ")[2] + "\")"
+	}
 
 	templateFindByMethod = strings.Replace(templateFindByMethod, "[name]", name, -1)
 	templateFindByMethod = strings.Replace(templateFindByMethod, "[nameUpper]", nameUpper, -1)
+	templateFindByMethod = strings.Replace(templateFindByMethod, "[preload]", preload, -1)
 	templateFindBy = strings.Replace(templateFindBy, "[nameUpper]", nameUpper, -1)
 
 	for i := 0; i < len(items)-6; i++ {
@@ -914,6 +935,7 @@ func createRepository(items []string, name string, project string) error {
 	template = strings.Replace(template, "[project]", project, -1)
 	template = strings.Replace(template, "[findByMethod]", findByMethod, -1)
 	template = strings.Replace(template, "[findBy]", findBy, -1)
+	template = strings.Replace(template, "[preload]", preload, -1)
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
@@ -924,30 +946,96 @@ func createRepository(items []string, name string, project string) error {
 	return nil
 }
 
-func createEntity(items []string, name string, project string) error {
+func createEntity(items []string, name string, project string, relation []map[string]string) ([]string, error) {
+	itemReturn := []string{}
 	err := os.MkdirAll(project+"/entity", os.ModePerm)
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	file, err := os.Create(project + "/entity/" + name + "Entity.go")
 
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	defer file.Close()
 
 	names := strings.Split(name, "")
 	names[0] = strings.ToUpper(names[0])
-	name = strings.Join(names, "")
+	nameUpper := strings.Join(names, "")
 	var codes = []string{
 		"package entity",
 		"",
-		"type " + name + " struct{",
+		"type " + nameUpper + " struct{",
 	}
 
+	status := ""
+	relationPartner := ""
+
+	for _, value := range relation {
+		if strings.Contains(value["table1"], name) {
+			if strings.Contains(value["relationName"], "1M") {
+				status = "table1 1M"
+				relationPartner = strings.Split(value["table2"], " ")[0]
+			}
+			if strings.Contains(value["relationName"], "MM") {
+				status = "table1 MM"
+				relationPartner = strings.Split(value["table2"], " ")[0]
+			}
+			if strings.Contains(value["relationName"], "11") {
+				status = "table1 11"
+				relationPartner = strings.Split(value["table2"], " ")[0]
+			}
+		}
+
+		if strings.Contains(value["table2"], name) {
+			if strings.Contains(value["relationName"], "1M") {
+				status = "table2 1M"
+				relationPartner = strings.Split(value["table1"], " ")[0]
+			}
+			if strings.Contains(value["relationName"], "MM") {
+				status = "table2 MM"
+				relationPartner = strings.Split(value["table1"], " ")[0]
+			}
+			if strings.Contains(value["relationName"], "11") {
+				status = "table2 11"
+				relationPartner = strings.Split(value["table1"], " ")[0]
+			}
+		}
+
+	}
+
+	relationPartnerUpper := ""
+	if relationPartner != "" {
+		temp := strings.Split(relationPartner, "")
+		temp[0] = strings.ToUpper(temp[0])
+		relationPartnerUpper = strings.Join(temp, "")
+	}
+
+	fmt.Println(name + " " + status)
+
 	for _, value := range items {
+		if status == "table1 1M" {
+			if value == "CreatedBy string" {
+				codes = append(codes, relationPartnerUpper+"s []"+relationPartnerUpper+"`gorm:\"ForeignKey:"+nameUpper+"Id\"`")
+			}
+		}
+		if status == "table2 1M" {
+			if value == "CreatedBy string" {
+				codes = append(codes, relationPartnerUpper+"Id int")
+				itemReturn = append(itemReturn, relationPartnerUpper+"Id int "+relationPartnerUpper)
+				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper)
+			}
+		}
+		if status == "table1 11" {
+			if value == "CreatedBy string" {
+				codes = append(codes, relationPartnerUpper+"Id int")
+				itemReturn = append(itemReturn, relationPartnerUpper+"Id int "+relationPartnerUpper)
+				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper)
+			}
+		}
+		itemReturn = append(itemReturn, value)
 		if value == "Id int" {
 			codes = append(codes, value+"`gorm:\"primarykey;autoIncrement:true\"`")
 		} else {
@@ -960,10 +1048,11 @@ func createEntity(items []string, name string, project string) error {
 	for _, code := range codes {
 		_, err := fmt.Fprintln(file, code)
 		if err != nil {
-			return err
+			return itemReturn, err
 		}
 
 	}
+	fmt.Println(itemReturn)
 	fmt.Println(name + " entity Created")
-	return nil
+	return itemReturn, nil
 }
