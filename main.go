@@ -73,12 +73,14 @@ func main() {
 
 		project := strings.ToLower(fmt.Sprintf("%v", projectObject))
 
-		for _, obj := range relationObject.([]interface{}) {
-			temp := map[string]string{}
-			for key, val := range obj.(map[string]interface{}) {
-				temp[key] = val.(string)
+		if relationObject != nil {
+			for _, obj := range relationObject.([]interface{}) {
+				temp := map[string]string{}
+				for key, val := range obj.(map[string]interface{}) {
+					temp[key] = val.(string)
+				}
+				relation = append(relation, temp)
 			}
-			relation = append(relation, temp)
 		}
 
 		for key, obj := range entity.(map[string]interface{}) {
