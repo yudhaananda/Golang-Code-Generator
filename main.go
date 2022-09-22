@@ -40,6 +40,14 @@ func main() {
 			return
 		}
 
+		split := strings.Split(content.Filename, ".")
+		extention := split[len(split)-1]
+
+		if extention != "json" {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte("Only .json file"))
+			return
+		}
+
 		file, err := content.Open()
 
 		if err != nil {
