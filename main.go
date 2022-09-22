@@ -71,7 +71,10 @@ func main() {
 		entity := jsonContent["entity"]
 		relationObject := jsonContent["relation"]
 
-		project := strings.ToLower(fmt.Sprintf("%v", projectObject))
+		project := ""
+		if projectObject != nil {
+			project = strings.ToLower(fmt.Sprintf("%v", projectObject))
+		}
 
 		if relationObject != nil {
 			for _, obj := range relationObject.([]interface{}) {
@@ -83,12 +86,14 @@ func main() {
 			}
 		}
 
-		for key, obj := range entity.(map[string]interface{}) {
-			temp := []string{}
-			for _, val := range obj.([]interface{}) {
-				temp = append(temp, val.(string))
+		if entity != nil {
+			for key, obj := range entity.(map[string]interface{}) {
+				temp := []string{}
+				for _, val := range obj.([]interface{}) {
+					temp = append(temp, val.(string))
+				}
+				objs[key] = temp
 			}
-			objs[key] = temp
 		}
 		result, err := process(objs, project, relation)
 		if err != nil {
