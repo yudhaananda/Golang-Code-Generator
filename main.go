@@ -635,10 +635,15 @@ func createHandler(items []string, name string, project string) error {
 	if err != nil {
 		return err
 	}
+	fileTemplateHandlerPaging, err := os.ReadFile("template/GetByPagingHandler.txt")
+	if err != nil {
+		return err
+	}
 
 	template := string(fileTemplate)
 	templateGetByHandler := string(fileTemplateGetByHandler)
 	templateHandlerConvert := string(fileTemplateHandlerConvert)
+	templatePaging := string(fileTemplateHandlerPaging)
 	getByHandler := ""
 
 	names := strings.Split(name, "")
@@ -648,6 +653,7 @@ func createHandler(items []string, name string, project string) error {
 	templateGetByHandler = strings.Replace(templateGetByHandler, "[name]", name, -1)
 	templateGetByHandler = strings.Replace(templateGetByHandler, "[nameUpper]", nameUpper, -1)
 	templateHandlerConvert = strings.Replace(templateHandlerConvert, "[nameUpper]", nameUpper, -1)
+	templatePaging = strings.Replace(templatePaging, "[nameUpper]", nameUpper, -1)
 
 	for i := 0; i < len(items)-6; i++ {
 		itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
@@ -659,14 +665,21 @@ func createHandler(items []string, name string, project string) error {
 		if strings.Contains(type_, "Float") {
 			type_ = "Float"
 		}
-
+		paging := ""
+		pagingItem := ""
 		tempGetByHandler := ""
 		if itemLower != "password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
+			if itemLower != "id" {
+				pagingItem = ", paging"
+				paging = templatePaging
+
+			}
 			tempGetByHandler = strings.Replace(templateGetByHandler, "[item]", itemLower, -1)
 			tempGetByHandler = strings.Replace(tempGetByHandler, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 			tempGetByHandler = strings.Replace(tempGetByHandler, "[type]", type_, -1)
+			tempGetByHandler = strings.Replace(tempGetByHandler, "[paging]", paging, -1)
 			if type_ == "String" {
-				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower, -1)
+				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower+pagingItem, -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[convert]", "", -1)
 			} else {
 				tempHandlerConvert := strings.Replace(templateHandlerConvert, "[itemParam]", itemLower+type_, -1)
@@ -688,7 +701,7 @@ func createHandler(items []string, name string, project string) error {
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[parseType]", "ParseBool", -1)
 					tempHandlerConvert = strings.Replace(tempHandlerConvert, "[param]", "", -1)
 				}
-				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower+type_, -1)
+				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower+type_+pagingItem, -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[convert]", tempHandlerConvert, -1)
 			}
 			getByHandler += tempGetByHandler + "\n"
@@ -831,16 +844,22 @@ func createService(items []string, name string, project string) error {
 		itemLower := strings.Join(itemSplit, "")
 		tempGetByServiceMethod := ""
 		tempGetByService := ""
+		pagingParam := ""
+		pagingItem := ""
 
 		if itemLower != "password" {
 
+			if itemLower != "id" {
+				pagingParam = ", paging helper.Paging"
+				pagingItem = ", paging"
+			}
 			tempGetByServiceMethod = strings.Replace(templateGetByServiceMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
-			tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
-			tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[item]", itemLower, -1)
+			tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
+			tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[item]", itemLower+pagingItem, -1)
 			getByServiceMethod += tempGetByServiceMethod + "\n"
 
 			tempGetByService = strings.Replace(templateGetByService, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
-			tempGetByService = strings.Replace(tempGetByService, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+			tempGetByService = strings.Replace(tempGetByService, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
 			getByService += tempGetByService + "\n"
 		}
 	}
@@ -929,17 +948,24 @@ func createRepository(items []string, name string, project string, itemCompares 
 		item_ := strings.Join(itemSplit, "")
 		tempFindByMethod := ""
 		tempFindBy := ""
+		pagingParam := ""
+		paging := ""
 
 		if itemLower != "password" {
+			if itemLower != "id" {
+				pagingParam = ", paging helper.Paging"
+				paging = ".Offset((paging.Page - 1) * paging.Take).Limit(paging.Take).Order(paging.OrderBy)"
+			}
 			tempFindByMethod = strings.Replace(templateFindByMethod, "[item]", itemLower, -1)
 			tempFindByMethod = strings.Replace(tempFindByMethod, "[item_]", item_, -1)
 			tempFindByMethod = strings.Replace(tempFindByMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
-			tempFindByMethod = strings.Replace(tempFindByMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+			tempFindByMethod = strings.Replace(tempFindByMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
+			tempFindByMethod = strings.Replace(tempFindByMethod, "[paging]", paging, -1)
 			findByMethod += tempFindByMethod
 
 			tempFindBy = strings.Replace(templateFindBy, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 			tempFindBy = strings.Replace(tempFindBy, "[item]", itemLower, -1)
-			tempFindBy = strings.Replace(tempFindBy, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1], -1)
+			tempFindBy = strings.Replace(tempFindBy, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
 			fmt.Println(itemLower + " " + strings.Split(items[i], " ")[1])
 			findBy += tempFindBy + "\n"
 		}
@@ -1040,14 +1066,14 @@ func createEntity(items []string, name string, project string, relation []map[st
 			if value == "CreatedBy string" {
 				codes = append(codes, relationPartnerUpper+"Id int")
 				itemReturn = append(itemReturn, relationPartnerUpper+"Id int "+relationPartnerUpper)
-				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper)
+				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper+" `gorm:\"ForeignKey:"+relationPartnerUpper+"Id\"`")
 			}
 		}
 		if status == "table1 11" {
 			if value == "CreatedBy string" {
 				codes = append(codes, relationPartnerUpper+"Id int")
 				itemReturn = append(itemReturn, relationPartnerUpper+"Id int "+relationPartnerUpper)
-				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper)
+				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper+" `gorm:\"ForeignKey:"+relationPartnerUpper+"Id\"`")
 			}
 		}
 		itemReturn = append(itemReturn, value)

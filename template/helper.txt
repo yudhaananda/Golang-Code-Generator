@@ -15,6 +15,12 @@ type Meta struct {
 	Status  string `json:"status"`
 }
 
+type Paging struct {
+	Page    int
+	Take    int
+	OrderBy string
+}
+
 func APIResponse(message string, code int, status string, data interface{}) Response {
 	meta := Meta{
 		Message: message,

@@ -1,5 +1,7 @@
 func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 	[item] := c.Param("[item]")
+
+	[paging]
 	[convert]
 
 	[name], err := h.[name]Service.Get[nameUpper]By[itemUpper]([itemParam])

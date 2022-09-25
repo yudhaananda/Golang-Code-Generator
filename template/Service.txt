@@ -1,19 +1,18 @@
 package service
 
 import (
+	"errors"
 	"[project]/entity"
+	"[project]/helper"
 	"[project]/input"
 	"[project]/repository"
-	"errors"
-	"strconv"
 	"time"
 )
 
 type [nameUpper]Service interface {
 	Create[nameUpper](input input.[nameUpper]Input, userLogin entity.User) (entity.[nameUpper], error)
 	Edit[nameUpper](input input.[nameUpper]EditInput, userLogin entity.User) (entity.[nameUpper], error)
-	[getBy]
-	GetAll[nameUpper]() ([]entity.[nameUpper], error)
+	[getBy]GetAll[nameUpper](paging helper.Paging) ([]entity.[nameUpper], error)
 	Delete[nameUpper](id int, userLogin entity.User) (entity.[nameUpper], error)
 
 }
@@ -64,8 +63,8 @@ func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput, userLo
 
 [getByMethod]
 
-func (s *[name]Service) GetAll[nameUpper]() ([]entity.[nameUpper], error) {
-	[name]s, err := s.[name]Repository.FindAll()
+func (s *[name]Service) GetAll[nameUpper](paging helper.Paging) ([]entity.[nameUpper], error) {
+	[name]s, err := s.[name]Repository.FindAll(paging)
 
 	if err != nil {
 		return [name]s, err

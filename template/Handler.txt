@@ -101,7 +101,19 @@ func (h *[name]Handler) Edit[nameUpper](c *gin.Context) {
 }
 
 func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
-	[name]s, err := h.[name]Service.GetAll[nameUpper]()
+
+	var paging helper.Paging
+
+	err := c.ShouldBindJSON(&paging)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	[name]s, err := h.[name]Service.GetAll[nameUpper](paging)
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
