@@ -26,8 +26,8 @@
         ]
     },
     "relation": [{
-        "table1": "user",
-        "table2": "role",
-        "relationName": "11"
+        "table1": "role",
+        "table2": "user",
+        "relationName": "1M"
     }]
 }
