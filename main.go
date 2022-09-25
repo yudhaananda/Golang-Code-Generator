@@ -678,7 +678,7 @@ func createHandler(items []string, name string, project string) error {
 			tempGetByHandler := ""
 			if itemLower != "password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
 				if itemLower != "id" {
-					pagingItem = ", paging"
+					pagingItem = ", helper.SetPagingDefault(paging)"
 					paging = templatePaging
 
 				}

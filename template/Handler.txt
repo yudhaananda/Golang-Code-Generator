@@ -115,7 +115,7 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 		return
 	}
 
-	[name]s, err := h.[name]Service.GetAll[nameUpper](paging)
+	[name]s, err := h.[name]Service.GetAll[nameUpper](helper.SetPagingDefault(paging))
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}

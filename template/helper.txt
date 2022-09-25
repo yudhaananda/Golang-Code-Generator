@@ -21,6 +21,17 @@ type Paging struct {
 	OrderBy string
 }
 
+func SetPagingDefault(pg Paging) Paging {
+	paging := pg
+	if paging.Page == 0 {
+		paging.Page = 1
+	}
+	if paging.Take == 0 {
+		paging.Take = -1
+	}
+	return paging
+}
+
 func APIResponse(message string, code int, status string, data interface{}) Response {
 	meta := Meta{
 		Message: message,
