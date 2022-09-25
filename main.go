@@ -75,13 +75,20 @@ func main() {
 
 		relation := []map[string]string{}
 
+		database := map[string]string{}
+
 		projectObject := jsonContent["projectName"]
 		entity := jsonContent["entity"]
 		relationObject := jsonContent["relation"]
+		databaseObject := jsonContent["database"]
 
 		project := ""
 		if projectObject != nil {
 			project = strings.ToLower(fmt.Sprintf("%v", projectObject))
+		}
+
+		for key, val := range databaseObject.(map[string]interface{}) {
+			database[key] = val.(string)
 		}
 
 		if relationObject != nil {
@@ -103,7 +110,7 @@ func main() {
 				objs[key] = temp
 			}
 		}
-		result, err := process(objs, project, relation)
+		result, err := process(objs, project, relation, database)
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
@@ -122,7 +129,7 @@ func main() {
 	router.Run()
 }
 
-func process(objs map[string][]string, project string, relation []map[string]string) ([]byte, error) {
+func process(objs map[string][]string, project string, relation []map[string]string, database map[string]string) ([]byte, error) {
 
 	for key, obj := range objs {
 
@@ -170,7 +177,15 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
-	err = createMain(objs, project)
+	err = createMain(objs, project, database)
+	if err != nil {
+		return nil, err
+	}
+	err = createEnvFile(project, database)
+	if err != nil {
+		return nil, err
+	}
+	err = createEnvEntity(project)
 	if err != nil {
 		return nil, err
 	}
@@ -362,6 +377,62 @@ func createApiListHtml(objs map[string][]string, project string) error {
 	return nil
 }
 
+func createEnvFile(project string, database map[string]string) error {
+	err := os.MkdirAll(project, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(project + "/.env")
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	code := "DB_USER = \"" + database["user"] + "\"\nDB_PASS = \"" + database["pass"] + "\"\nDB_PORT = \"" + database["port"] + "\"\nDB_HOST = \"" + database["host"] + "\"\nDB_NAME = \"" + project + "\"\nJWT_SECRET_TOKEN=\"" + database["jwttoken"] + "\""
+
+	_, err = fmt.Fprintln(file, code)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createEnvEntity(project string) error {
+	err := os.MkdirAll(project+"/entity", os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(project + "/entity/envEntity.go")
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+	copy, err := os.Open("template/envEntity.txt")
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	_, err = io.Copy(file, copy)
+	if err != nil {
+		return err
+	}
+
+	err = file.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func createJwtService(project string) error {
 	err := os.MkdirAll(project+"/service/", os.ModePerm)
 	if err != nil {
@@ -496,7 +567,7 @@ func createAuthService(items []string, project string) error {
 	return nil
 }
 
-func createMain(objs map[string][]string, project string) error {
+func createMain(objs map[string][]string, project string, database map[string]string) error {
 	err := os.MkdirAll(project, os.ModePerm)
 	if err != nil {
 		return err
@@ -568,6 +639,17 @@ func createMain(objs map[string][]string, project string) error {
 	template = strings.Replace(template, "[serviceArea]", serviceArea, -1)
 	template = strings.Replace(template, "[handlerArea]", handlerArea, -1)
 	template = strings.Replace(template, "[apiArea]", apiArea, -1)
+	template = strings.Replace(template, "[dbType]", database["type"], -1)
+
+	if database["type"] == "mysql" {
+		template = strings.Replace(template, "[dsnString]", "\"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local\", env.DB_USER, env.DB_PASS, env.DB_HOST, env.DB_PORT, env.DB_NAME", -1)
+	} else if database["type"] == "postgres" {
+		template = strings.Replace(template, "[dsnString]", "\"host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Shanghai\", env.DB_HOST, env.DB_USER, env.DB_PASS, env.DB_NAME, env.DB_PORT", -1)
+	} else if database["type"] == "sqlite" {
+		template = strings.Replace(template, "[dsnString]", "gorm.db", -1)
+	} else if database["type"] == "sqlserver" {
+		template = strings.Replace(template, "[dsnString]", "\"sqlserver://%s:%s@%s:%s?database=%s\", env.DB_USER, DB_PASS, env.DB_HOST, env.DB_PORT, env.DB_NAME", -1)
+	}
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {

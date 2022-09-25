@@ -9,7 +9,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/[dbType]"
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 
 	"log"
@@ -22,8 +23,15 @@ import (
 
 func main() {
 
-	dsn := "root:@tcp(127.0.0.1:3306)/[project]?charset=utf8mb4&parseTime=true&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	env := entity.SetEnv()
+
+	dsn := fmt.Sprintf([dsnString])
+	db, err := gorm.Open([dbType].Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err.Error())

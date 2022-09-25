@@ -29,5 +29,13 @@
         "table1": "role",
         "table2": "user",
         "relationName": "1M"
-    }]
+    }],
+    "database": {
+        "type": "mysql",
+        "user": "root",
+        "pass": "",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "jwttoken": "token"
+    }
 }
