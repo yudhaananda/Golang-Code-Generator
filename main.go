@@ -326,7 +326,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		apiArea += strings.Replace(loop, "[item]", "api.GET(\"/getall"+key+"s\")\n", -1)
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
-		apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
+		apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaGet]", -1)
 		apiArea += strings.Replace(loop, "[item]", "api.DELETE(\"/delete"+key+"/:id\")\n", -1)
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
@@ -343,6 +343,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		}
 		jsonAreaCreate := "<p><b>Json Request</b></p>\n{"
 		jsonAreaEdit := "<p><b>Json Request</b></p>\n{"
+		jsonAreaGet := "<p><b>Json Request</b></p>\n{\"Page\": int <br>\n \"Take\": int <br>\n \"OrderBy\": string <br>\n}"
 		for i := 0; i < len(items)-6; i++ {
 			if len(strings.Split(items[i], " ")) > 1 {
 				itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
@@ -352,7 +353,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 					apiArea += strings.Replace(loop, "[item]", "api.GET(\"/get"+key+"by"+strings.ToLower(itemLower)+"/:"+itemLower+"\")\n", -1)
 					count += 1
 					apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
-					apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
+					apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaGet]", -1)
 				}
 				if i != 0 {
 					jsonAreaCreate += "\"" + strings.ToLower(strings.Split(items[i], " ")[0]) + "\" : " + strings.Split(items[i], " ")[1] + "<br>\n"
@@ -367,6 +368,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		}
 		apiArea = strings.Replace(apiArea, "[jsonAreaEdit]", jsonAreaEdit, -1)
 		apiArea = strings.Replace(apiArea, "[jsonAreaCreate]", jsonAreaCreate, -1)
+		apiArea = strings.Replace(apiArea, "[jsonAreaGet]", jsonAreaGet, -1)
 	}
 	template = strings.Replace(template, "[itemLoop]", apiArea, -1)
 
