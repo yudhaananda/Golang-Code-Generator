@@ -319,7 +319,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
 		apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaCreate]", -1)
-		apiArea += strings.Replace(loop, "[item]", "api.POST(\"/edit"+key+"\")\n", -1)
+		apiArea += strings.Replace(loop, "[item]", "api.PUT(\"/edit"+key+"\")\n", -1)
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
 		apiArea = strings.Replace(apiArea, "[jsonArea]", "[jsonAreaEdit]", -1)
@@ -327,7 +327,7 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
 		apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
-		apiArea += strings.Replace(loop, "[item]", "api.GET(\"/delete"+key+"/:id\")\n", -1)
+		apiArea += strings.Replace(loop, "[item]", "api.DELETE(\"/delete"+key+"/:id\")\n", -1)
 		count += 1
 		apiArea = strings.Replace(apiArea, "[id]", strconv.FormatInt(int64(count), 10), -1)
 		apiArea = strings.Replace(apiArea, "[jsonArea]", "", -1)
