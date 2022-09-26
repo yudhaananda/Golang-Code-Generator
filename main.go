@@ -609,9 +609,9 @@ func createMain(objs map[string][]string, project string, database map[string]st
 		serviceArea += varService + " := service.New" + keyUpper + "Service(" + varRepo + ")\n"
 		handlerArea += key + "Handler := handler.New" + keyUpper + "Handler(" + varService + ")\n"
 		apiArea += "api.POST(\"/create" + strings.ToLower(key) + "\", authMiddleware(jwtService, userService), " + key + "Handler.Create" + keyUpper + ")\n"
-		apiArea += "api.POST(\"/edit" + strings.ToLower(key) + "\", authMiddleware(jwtService, userService), " + key + "Handler.Edit" + keyUpper + ")\n"
+		apiArea += "api.PUT(\"/edit" + strings.ToLower(key) + "\", authMiddleware(jwtService, userService), " + key + "Handler.Edit" + keyUpper + ")\n"
 		apiArea += "api.GET(\"/getall" + strings.ToLower(key) + "s\", authMiddleware(jwtService, userService), " + key + "Handler.GetAll" + keyUpper + "s)\n"
-		apiArea += "api.GET(\"/delete" + strings.ToLower(key) + "/:id\", authMiddleware(jwtService, userService), " + key + "Handler.Delete" + keyUpper + ")\n"
+		apiArea += "api.DELETE(\"/delete" + strings.ToLower(key) + "/:id\", authMiddleware(jwtService, userService), " + key + "Handler.Delete" + keyUpper + ")\n"
 		if key == "user" {
 			serviceArea += "authService := service.NewAuthService(userRepository)\n"
 			serviceArea += "jwtService := service.NewJwtService()\n"
