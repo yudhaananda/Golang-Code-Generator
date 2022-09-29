@@ -1,0 +1,10 @@
+initialize:
+	go mod init testapp
+	go get github.com/gin-gonic/gin
+	go get github.com/go-playground/validator/v10
+	go get gorm.io/gorm
+	go get golang.org/x/crypto/bcrypt
+	go get gorm.io/driver/[database]
+	go get github.com/joho/godotenv
+	go get github.com/gin-contrib/cors
+	go get github.com/dgrijalva/jwt-go

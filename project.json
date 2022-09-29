@@ -15,7 +15,7 @@
             "DeletedBy string",
             "DeletedDate time.Time"
         ],
-        "role": ["Id int",
+        "userRole": ["Id int",
             "RoleName string",
             "CreatedBy string",
             "CreatedDate time.Time",
@@ -26,7 +26,7 @@
         ]
     },
     "relation": [{
-        "table1": "role",
+        "table1": "userRole",
         "table2": "user",
         "relationName": "1M"
     }],

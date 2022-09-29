@@ -185,6 +185,10 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
+	err = createMakeFile(project, database)
+	if err != nil {
+		return nil, err
+	}
 	err = createEnvEntity(project)
 	if err != nil {
 		return nil, err
@@ -394,6 +398,30 @@ func createEnvFile(project string, database map[string]string) error {
 	defer file.Close()
 
 	code := "DB_USER = \"" + database["user"] + "\"\nDB_PASS = \"" + database["pass"] + "\"\nDB_PORT = \"" + database["port"] + "\"\nDB_HOST = \"" + database["host"] + "\"\nDB_NAME = \"" + project + "\"\nJWT_SECRET_TOKEN=\"" + database["jwttoken"] + "\""
+
+	_, err = fmt.Fprintln(file, code)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createMakeFile(project string, database map[string]string) error {
+	err := os.MkdirAll(project, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(project + "/Makefile")
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	code := "initialize:\n	go mod init " + project + "\n	go get github.com/gin-gonic/gin\n	go get github.com/go-playground/validator/v10\n	go get gorm.io/gorm\n	go get golang.org/x/crypto/bcrypt\n	go get gorm.io/driver/" + database["type"] + "\n	go get github.com/joho/godotenv\n	go get github.com/gin-contrib/cors\n	go get github.com/dgrijalva/jwt-go"
 
 	_, err = fmt.Fprintln(file, code)
 	if err != nil {
@@ -1115,6 +1143,8 @@ func createEntity(items []string, name string, project string, relation []map[st
 	nameUpper := strings.Join(names, "")
 	var codes = []string{
 		"package entity",
+		"",
+		"import \"time\"",
 		"",
 		"type " + nameUpper + " struct{",
 	}
