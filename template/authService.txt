@@ -44,7 +44,7 @@ func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 	}
 
 	user := entity.User{
-		[registerItem]
+[registerItem]
 	}
 
 	newUser, err := s.userRepository.Save(user)

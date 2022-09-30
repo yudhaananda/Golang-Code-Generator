@@ -579,13 +579,13 @@ func createAuthService(items []string, project string) error {
 	for i := 1; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
 			if strings.Split(items[i], " ")[0] != "Password" {
-				registerItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
+				registerItem += "		" + strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 			}
 		}
 	}
-	registerItem += "Password: string(password),\n"
-	registerItem += "CreatedBy: input.UserName,\n"
-	registerItem += "CreatedDate: time.Now(),"
+	registerItem += "		Password: string(password),\n"
+	registerItem += "		CreatedBy: input.UserName,\n"
+	registerItem += "		CreatedDate: time.Now(),"
 
 	template = strings.Replace(template, "[project]", project, -1)
 	template = strings.Replace(template, "[registerItem]", registerItem, -1)
@@ -889,7 +889,7 @@ func createInput(items []string, name string, project string) error {
 			"type LoginInput struct {",
 		}...)
 		for i := 1; i < 3; i++ {
-			codes = append(codes, items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
+			codes = append(codes, "	"+items[i]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 		}
 		codes = append(codes, "}")
 	}

@@ -10,7 +10,7 @@ import (
 type [nameUpper]Repository interface {
 	Save([name] entity.[nameUpper]) (entity.[nameUpper], error)
 	Edit([name] entity.[nameUpper]) (entity.[nameUpper], error)
-	[findBy]FindAll(paging helper.Paging) ([]entity.[nameUpper], error)
+[findBy]	FindAll(paging helper.Paging) ([]entity.[nameUpper], error)
 }
 
 type [name]Repository struct {
