@@ -12,7 +12,7 @@ import (
 type [nameUpper]Service interface {
 	Create[nameUpper](input input.[nameUpper]Input, userLogin entity.User) (entity.[nameUpper], error)
 	Edit[nameUpper](input input.[nameUpper]EditInput, userLogin entity.User) (entity.[nameUpper], error)
-	[getBy]GetAll[nameUpper](paging helper.Paging) ([]entity.[nameUpper], error)
+[getBy]	GetAll[nameUpper](paging helper.Paging) ([]entity.[nameUpper], error)
 	Delete[nameUpper](id int, userLogin entity.User) (entity.[nameUpper], error)
 
 }
@@ -27,7 +27,7 @@ func New[nameUpper]Service([name]Repository repository.[nameUpper]Repository) *[
 
 func (s *[name]Service) Create[nameUpper](input input.[nameUpper]Input, userLogin entity.User) (entity.[nameUpper], error) {
 	[name] := entity.[nameUpper]{
-		[createItem]
+[createItem]
 	}
 
 	new[nameUpper], err := s.[name]Repository.Save([name])
@@ -49,7 +49,7 @@ func (s *[name]Service) Edit[nameUpper](input input.[nameUpper]EditInput, userLo
 	old[nameUpper]:= old[nameUpper]s[0]
 
 	[name] := entity.[nameUpper]{
-		[editItem]
+[editItem]
 	}
 
 	new[nameUpper], err := s.[name]Repository.Edit([name])

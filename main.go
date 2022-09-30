@@ -868,7 +868,7 @@ func createInput(items []string, name string, project string) error {
 	for i := 1; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
 			temp := strings.Split(items[i], " ")
-			codes = append(codes, temp[0]+" "+temp[1]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
+			codes = append(codes, "	"+temp[0]+" "+temp[1]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 		}
 	}
 	codes = append(codes, []string{
@@ -879,7 +879,7 @@ func createInput(items []string, name string, project string) error {
 	for i := 0; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
 			temp := strings.Split(items[i], " ")
-			codes = append(codes, temp[0]+" "+temp[1]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
+			codes = append(codes, "	"+temp[0]+" "+temp[1]+" `json:\""+strings.ToLower(strings.Split(items[i], " ")[0])+"\" binding:\"required\"`")
 		}
 	}
 	codes = append(codes, "}")
@@ -956,18 +956,18 @@ func createService(items []string, name string, project string) error {
 
 	for i := 1; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
-			createItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
+			createItem += "		" + strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 		}
 	}
 
-	createItem += "CreatedBy: userLogin.UserName,\n"
-	createItem += "CreatedDate: time.Now(),"
+	createItem += "		CreatedBy: userLogin.UserName,\n"
+	createItem += "		CreatedDate: time.Now(),"
 
 	editItem := ""
 	for i := 0; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
 
-			editItem += strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
+			editItem += "		" + strings.Split(items[i], " ")[0] + ": input." + strings.Split(items[i], " ")[0] + ",\n"
 			itemSplit := strings.Split(strings.Split(items[i], " ")[0], "")
 			itemSplit[0] = strings.ToLower(itemSplit[0])
 			itemLower := strings.Join(itemSplit, "")
@@ -993,9 +993,9 @@ func createService(items []string, name string, project string) error {
 			}
 		}
 	}
-	editItem += "CreatedBy: old" + nameUpper + ".CreatedBy,\n"
-	editItem += "CreatedDate: old" + nameUpper + ".CreatedDate,\n"
-	editItem += "UpdatedBy: userLogin.UserName,\n"
+	editItem += "		CreatedBy: old" + nameUpper + ".CreatedBy,\n"
+	editItem += "		CreatedDate: old" + nameUpper + ".CreatedDate,\n"
+	editItem += "		UpdatedBy: userLogin.UserName,\n"
 
 	template = strings.Replace(template, "[name]", name, -1)
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)
@@ -1149,79 +1149,82 @@ func createEntity(items []string, name string, project string, relation []map[st
 		"type " + nameUpper + " struct{",
 	}
 
-	status := ""
-	relationPartner := ""
+	var status []string
+	var relationPartner []string
 
 	for _, value := range relation {
-		if strings.Contains(value["table1"], name) {
-			if strings.Contains(value["relationName"], "1M") {
-				status = "table1 1M"
-				relationPartner = strings.Split(value["table2"], " ")[0]
+		if value["table1"] == name {
+			if value["relationName"] == "1M" {
+				status = append(status, "table1 1M")
+				relationPartner = append(relationPartner, strings.Split(value["table2"], " ")[0])
 			}
-			if strings.Contains(value["relationName"], "MM") {
-				status = "table1 MM"
-				relationPartner = strings.Split(value["table2"], " ")[0]
+			if value["relationName"] == "MM" {
+				status = append(status, "table1 MM")
+				relationPartner = append(relationPartner, strings.Split(value["table2"], " ")[0])
 			}
-			if strings.Contains(value["relationName"], "11") {
-				status = "table1 11"
-				relationPartner = strings.Split(value["table2"], " ")[0]
+			if value["relationName"] == "11" {
+				status = append(status, "table1 11")
+				relationPartner = append(relationPartner, strings.Split(value["table2"], " ")[0])
 			}
 		}
 
-		if strings.Contains(value["table2"], name) {
+		if value["table2"] == name {
 			if strings.Contains(value["relationName"], "1M") {
-				status = "table2 1M"
-				relationPartner = strings.Split(value["table1"], " ")[0]
+				status = append(status, "table2 1M")
+				relationPartner = append(relationPartner, strings.Split(value["table1"], " ")[0])
 			}
-			if strings.Contains(value["relationName"], "MM") {
-				status = "table2 MM"
-				relationPartner = strings.Split(value["table1"], " ")[0]
+			if value["relationName"] == "MM" {
+				status = append(status, "table2 MM")
+				relationPartner = append(relationPartner, strings.Split(value["table1"], " ")[0])
 			}
-			if strings.Contains(value["relationName"], "11") {
-				status = "table2 11"
-				relationPartner = strings.Split(value["table1"], " ")[0]
+			if value["relationName"] == "11" {
+				status = append(status, "table2 11")
+				relationPartner = append(relationPartner, strings.Split(value["table1"], " ")[0])
 			}
 		}
 
 	}
 
-	relationPartnerUpper := ""
-	if relationPartner != "" {
-		temp := strings.Split(relationPartner, "")
-		temp[0] = strings.ToUpper(temp[0])
-		relationPartnerUpper = strings.Join(temp, "")
+	var relationPartnerUpper []string
+	for _, value := range relationPartner {
+		if value != "" {
+			temp := strings.Split(value, "")
+			temp[0] = strings.ToUpper(temp[0])
+			relationPartnerUpper = append(relationPartnerUpper, strings.Join(temp, ""))
+		}
 	}
-
-	fmt.Println(name + " " + status)
 
 	for _, value := range items {
-		if status == "table1 1M" {
-			if value == "CreatedBy string" {
-				codes = append(codes, relationPartnerUpper+"s []"+relationPartnerUpper+"`gorm:\"ForeignKey:"+nameUpper+"Id\"`")
-				itemReturn = append(itemReturn, relationPartnerUpper+"s")
+		for key, vStatus := range status {
+
+			if vStatus == "table1 1M" {
+				if value == "CreatedBy string" {
+					codes = append(codes, "	"+relationPartnerUpper[key]+"s []"+relationPartnerUpper[key]+"`gorm:\"ForeignKey:"+nameUpper+"Id\"`")
+					itemReturn = append(itemReturn, relationPartnerUpper[key]+"s")
+				}
 			}
-		}
-		if status == "table2 1M" {
-			if value == "CreatedBy string" {
-				codes = append(codes, relationPartnerUpper+"Id int")
-				itemReturn = append(itemReturn, relationPartnerUpper+"Id int "+relationPartnerUpper)
-				itemReturn = append(itemReturn, relationPartnerUpper)
-				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper+" `gorm:\"ForeignKey:"+relationPartnerUpper+"Id\"`")
+			if vStatus == "table2 1M" {
+				if value == "CreatedBy string" {
+					codes = append(codes, "	"+relationPartnerUpper[key]+"Id int")
+					itemReturn = append(itemReturn, relationPartnerUpper[key]+"Id int "+relationPartnerUpper[key])
+					itemReturn = append(itemReturn, relationPartnerUpper[key])
+					codes = append(codes, "	"+relationPartnerUpper[key]+" "+relationPartnerUpper[key]+" `gorm:\"ForeignKey:"+relationPartnerUpper[key]+"Id\"`")
+				}
 			}
-		}
-		if status == "table1 11" {
-			if value == "CreatedBy string" {
-				codes = append(codes, relationPartnerUpper+"Id int")
-				itemReturn = append(itemReturn, relationPartnerUpper+"Id int "+relationPartnerUpper)
-				itemReturn = append(itemReturn, relationPartnerUpper)
-				codes = append(codes, relationPartnerUpper+" "+relationPartnerUpper+" `gorm:\"ForeignKey:"+relationPartnerUpper+"Id\"`")
+			if vStatus == "table1 11" {
+				if value == "CreatedBy string" {
+					codes = append(codes, "	"+relationPartnerUpper[key]+"Id int")
+					itemReturn = append(itemReturn, relationPartnerUpper[key]+"Id int "+relationPartnerUpper[key])
+					itemReturn = append(itemReturn, relationPartnerUpper[key])
+					codes = append(codes, "	"+relationPartnerUpper[key]+" "+relationPartnerUpper[key]+" `gorm:\"ForeignKey:"+relationPartnerUpper[key]+"Id\"`")
+				}
 			}
 		}
 		itemReturn = append(itemReturn, value)
 		if value == "Id int" {
-			codes = append(codes, value+"`gorm:\"primarykey;autoIncrement:true\"`")
+			codes = append(codes, "	"+value+"`gorm:\"primarykey;autoIncrement:true\"`")
 		} else {
-			codes = append(codes, value)
+			codes = append(codes, "	"+value)
 		}
 	}
 
