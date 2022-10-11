@@ -76,6 +76,6 @@ func main() {
 
 	[apiArea]
 
-	router.Run()
+	log.Fatal(router.Run())
 
 }
