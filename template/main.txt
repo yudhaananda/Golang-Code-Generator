@@ -18,6 +18,7 @@ import (
 	"[project]/entity"
 	"[project]/handler"
 	"[project]/helper"
+	"[project]/middleware"
 	"[project]/repository"
 	"[project]/service"
 )
@@ -47,6 +48,8 @@ func main() {
 	//Handler Region
 	[handlerArea]
 
+	authMiddleware := middleware.NewAuthMiddleware(jwtService, userService)
+
 	//Router Region
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
@@ -75,65 +78,4 @@ func main() {
 
 	router.Run()
 
-}
-
-func authMiddleware(jwtService service.JwtService, userService service.UserService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authheader := c.GetHeader("Authorization")
-
-		if !strings.Contains(authheader, "Bearer") {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		tokenString := ""
-		arrayToken := strings.Split(authheader, " ")
-		if len(arrayToken) == 2 {
-			tokenString = arrayToken[1]
-		}
-
-		token, err := jwtService.ValidateToken(tokenString)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		claim, ok := token.Claims.(jwt.MapClaims)
-
-		if !ok || !token.Valid {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		userId := int(claim["user_id"].(float64))
-
-		dateTime, err := time.Parse(time.RFC3339Nano, claim["time"].(string))
-
-		if err != nil {
-			response := helper.APIResponse("Error Parse Date", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		if dateTime.Before(time.Now()) {
-			response := helper.APIResponse("Session End", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		users, err := userService.GetUserById(userId)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-		user := users[0]
-
-		c.Set("currentUser", user)
-	}
 }

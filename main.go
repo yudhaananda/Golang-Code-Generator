@@ -189,6 +189,10 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
+	err = createAuthMiddleware(project)
+	if err != nil {
+		return nil, err
+	}
 	err = createEnvEntity(project)
 	if err != nil {
 		return nil, err
@@ -375,6 +379,36 @@ func createApiListHtml(objs map[string][]string, project string) error {
 		apiArea = strings.Replace(apiArea, "[jsonAreaGet]", jsonAreaGet, -1)
 	}
 	template = strings.Replace(template, "[itemLoop]", apiArea, -1)
+
+	_, err = fmt.Fprintln(file, template)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createAuthMiddleware(project string) error {
+	err := os.MkdirAll(project+"/middleware/", os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(project + "/middleware/authMiddleware.go")
+
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	fileTemplate, err := os.ReadFile("template/authMiddleware.txt")
+
+	if err != nil {
+		return err
+	}
+
+	template := string(fileTemplate)
+
+	template = strings.Replace(template, "[project]", project, -1)
 
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
@@ -638,10 +672,10 @@ func createMain(objs map[string][]string, project string, database map[string]st
 		varService := key + "Service"
 		serviceArea += varService + " := service.New" + keyUpper + "Service(" + varRepo + ")\n"
 		handlerArea += key + "Handler := handler.New" + keyUpper + "Handler(" + varService + ")\n"
-		apiArea += "api.POST(\"/create" + strings.ToLower(key) + "\", authMiddleware(jwtService, userService), " + key + "Handler.Create" + keyUpper + ")\n"
-		apiArea += "api.PUT(\"/edit" + strings.ToLower(key) + "\", authMiddleware(jwtService, userService), " + key + "Handler.Edit" + keyUpper + ")\n"
-		apiArea += "api.GET(\"/getall" + strings.ToLower(key) + "s\", authMiddleware(jwtService, userService), " + key + "Handler.GetAll" + keyUpper + "s)\n"
-		apiArea += "api.DELETE(\"/delete" + strings.ToLower(key) + "/:id\", authMiddleware(jwtService, userService), " + key + "Handler.Delete" + keyUpper + ")\n"
+		apiArea += "api.POST(\"/create" + strings.ToLower(key) + "\", authMiddleware.AuthMiddleware, " + key + "Handler.Create" + keyUpper + ")\n"
+		apiArea += "api.PUT(\"/edit" + strings.ToLower(key) + "\", authMiddleware.AuthMiddleware, " + key + "Handler.Edit" + keyUpper + ")\n"
+		apiArea += "api.GET(\"/getall" + strings.ToLower(key) + "s\", authMiddleware.AuthMiddleware, " + key + "Handler.GetAll" + keyUpper + "s)\n"
+		apiArea += "api.DELETE(\"/delete" + strings.ToLower(key) + "/:id\", authMiddleware.AuthMiddleware, " + key + "Handler.Delete" + keyUpper + ")\n"
 		if key == "user" {
 			serviceArea += "authService := service.NewAuthService(userRepository)\n"
 			serviceArea += "jwtService := service.NewJwtService()\n"
@@ -655,7 +689,7 @@ func createMain(objs map[string][]string, project string, database map[string]st
 				if strings.Split(items[i], " ")[0] != "Password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
 					itemSplit[0] = strings.ToLower(itemSplit[0])
 					itemLower := strings.Join(itemSplit, "")
-					apiArea += "api.GET(\"/get" + key + "by" + strings.ToLower(itemLower) + "/:" + itemLower + "\", authMiddleware(jwtService, userService), " + key + "Handler.Get" + keyUpper + "By" + strings.Split(items[i], " ")[0] + ")\n"
+					apiArea += "api.GET(\"/get" + key + "by" + strings.ToLower(itemLower) + "/:" + itemLower + "\", authMiddleware.AuthMiddleware, " + key + "Handler.Get" + keyUpper + "By" + strings.Split(items[i], " ")[0] + ")\n"
 				}
 			}
 		}
@@ -1101,7 +1135,7 @@ func createRepository(items []string, name string, project string, itemCompares 
 				tempFindBy = strings.Replace(templateFindBy, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempFindBy = strings.Replace(tempFindBy, "[item]", itemLower, -1)
 				tempFindBy = strings.Replace(tempFindBy, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
-				fmt.Println(itemLower + " " + strings.Split(items[i], " ")[1])
+
 				findBy += tempFindBy + "\n"
 			}
 		}
@@ -1237,7 +1271,6 @@ func createEntity(items []string, name string, project string, relation []map[st
 		}
 
 	}
-	fmt.Println(itemReturn)
 	fmt.Println(name + " entity Created")
 	return itemReturn, nil
 }
