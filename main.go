@@ -1030,6 +1030,7 @@ func createService(items []string, name string, project string) error {
 	editItem += "		CreatedBy: old" + nameUpper + ".CreatedBy,\n"
 	editItem += "		CreatedDate: old" + nameUpper + ".CreatedDate,\n"
 	editItem += "		UpdatedBy: userLogin.UserName,\n"
+	editItem += "		UpdatedDate: time.Now(),"
 
 	template = strings.Replace(template, "[name]", name, -1)
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)
