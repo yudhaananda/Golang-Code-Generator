@@ -10,12 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/[dbType]"
 	"github.com/joho/godotenv"
+	[isWebsocket]
 	"gorm.io/gorm"
 
 	"log"
 	"[project]/entity"
 	"[project]/handler"
-	"[project]/helper"
 	"[project]/middleware"
 	"[project]/repository"
 	"[project]/service"
@@ -37,6 +37,9 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	db.AutoMigrate([migrateArea])
+
+	[upgrader]
+
 	//Repository Region
 	[repoArea]
 

@@ -81,10 +81,16 @@ func main() {
 		entity := jsonContent["entity"]
 		relationObject := jsonContent["relation"]
 		databaseObject := jsonContent["database"]
+		isUsingWebsocketObject := jsonContent["isUsingWebsocket"]
 
 		project := ""
 		if projectObject != nil {
 			project = strings.ToLower(fmt.Sprintf("%v", projectObject))
+		}
+
+		isUsingWebsocket := false
+		if isUsingWebsocketObject != nil {
+			isUsingWebsocket = isUsingWebsocketObject.(bool)
 		}
 
 		for key, val := range databaseObject.(map[string]interface{}) {
@@ -110,7 +116,7 @@ func main() {
 				objs[key] = temp
 			}
 		}
-		result, err := process(objs, project, relation, database)
+		result, err := process(objs, project, relation, database, isUsingWebsocket)
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
@@ -129,7 +135,7 @@ func main() {
 	router.Run()
 }
 
-func process(objs map[string][]string, project string, relation []map[string]string, database map[string]string) ([]byte, error) {
+func process(objs map[string][]string, project string, relation []map[string]string, database map[string]string, isUsingWebsocket bool) ([]byte, error) {
 
 	for key, obj := range objs {
 
@@ -155,7 +161,7 @@ func process(objs map[string][]string, project string, relation []map[string]str
 		if err != nil {
 			return nil, err
 		}
-		err = createHandler(objNew, key, project)
+		err = createHandler(objNew, key, project, isUsingWebsocket)
 		if err != nil {
 			return nil, err
 		}
@@ -177,7 +183,7 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
-	err = createMain(objs, project, database)
+	err = createMain(objs, project, database, isUsingWebsocket)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +191,7 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
-	err = createMakeFile(project, database)
+	err = createMakeFile(project, database, isUsingWebsocket)
 	if err != nil {
 		return nil, err
 	}
@@ -441,7 +447,7 @@ func createEnvFile(project string, database map[string]string) error {
 	return nil
 }
 
-func createMakeFile(project string, database map[string]string) error {
+func createMakeFile(project string, database map[string]string, isUsingWebsocket bool) error {
 	err := os.MkdirAll(project, os.ModePerm)
 	if err != nil {
 		return err
@@ -456,6 +462,10 @@ func createMakeFile(project string, database map[string]string) error {
 	defer file.Close()
 
 	code := "initialize:\n	go mod init " + project + "\n	go get github.com/gin-gonic/gin\n	go get github.com/go-playground/validator/v10\n	go get gorm.io/gorm\n	go get golang.org/x/crypto/bcrypt\n	go get gorm.io/driver/" + database["type"] + "\n	go get github.com/joho/godotenv\n	go get github.com/gin-contrib/cors\n	go get github.com/dgrijalva/jwt-go"
+
+	if isUsingWebsocket {
+		code += "\n	go get github.com/gorilla/websocket"
+	}
 
 	_, err = fmt.Fprintln(file, code)
 	if err != nil {
@@ -631,7 +641,7 @@ func createAuthService(items []string, project string) error {
 	return nil
 }
 
-func createMain(objs map[string][]string, project string, database map[string]string) error {
+func createMain(objs map[string][]string, project string, database map[string]string, isUsingWebsocket bool) error {
 	err := os.MkdirAll(project, os.ModePerm)
 	if err != nil {
 		return err
@@ -671,7 +681,11 @@ func createMain(objs map[string][]string, project string, database map[string]st
 		repoArea += varRepo + " := repository.New" + keyUpper + "Repository(db)\n"
 		varService := key + "Service"
 		serviceArea += varService + " := service.New" + keyUpper + "Service(" + varRepo + ")\n"
-		handlerArea += key + "Handler := handler.New" + keyUpper + "Handler(" + varService + ")\n"
+		if isUsingWebsocket {
+			handlerArea += key + "Handler := handler.New" + keyUpper + "Handler(" + varService + ", upgrader)\n"
+		} else {
+			handlerArea += key + "Handler := handler.New" + keyUpper + "Handler(" + varService + ")\n"
+		}
 		apiArea += "api.POST(\"/create" + strings.ToLower(key) + "\", authMiddleware.AuthMiddleware, " + key + "Handler.Create" + keyUpper + ")\n"
 		apiArea += "api.PUT(\"/edit" + strings.ToLower(key) + "\", authMiddleware.AuthMiddleware, " + key + "Handler.Edit" + keyUpper + ")\n"
 		apiArea += "api.GET(\"/getall" + strings.ToLower(key) + "s\", authMiddleware.AuthMiddleware, " + key + "Handler.GetAll" + keyUpper + "s)\n"
@@ -704,6 +718,14 @@ func createMain(objs map[string][]string, project string, database map[string]st
 	template = strings.Replace(template, "[handlerArea]", handlerArea, -1)
 	template = strings.Replace(template, "[apiArea]", apiArea, -1)
 	template = strings.Replace(template, "[dbType]", database["type"], -1)
+
+	if isUsingWebsocket {
+		template = strings.Replace(template, "[isWebsocket]", "\"github.com/gorilla/websocket\"", -1)
+		template = strings.Replace(template, "[upgrader]", "var upgrader = websocket.Upgrader{}", -1)
+	}
+
+	template = strings.Replace(template, "[isWebsocket]", "", -1)
+	template = strings.Replace(template, "[upgrader]", "", -1)
 
 	if database["type"] == "mysql" {
 		template = strings.Replace(template, "[dsnString]", "\"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true&loc=Local\", env.DB_USER, env.DB_PASS, env.DB_HOST, env.DB_PORT, env.DB_NAME", -1)
@@ -756,7 +778,7 @@ func createHelper(project string) error {
 	return nil
 }
 
-func createHandler(items []string, name string, project string) error {
+func createHandler(items []string, name string, project string, isUsingWebsocket bool) error {
 	err := os.MkdirAll(project+"/handler", os.ModePerm)
 	if err != nil {
 		return err
@@ -787,15 +809,41 @@ func createHandler(items []string, name string, project string) error {
 	if err != nil {
 		return err
 	}
+
 	fileTemplateHandlerPaging, err := os.ReadFile("template/GetByPagingHandler.txt")
 	if err != nil {
 		return err
+	}
+
+	fileTemplateGetAllHandler, err := os.ReadFile("template/GetAllHandler.txt")
+	if err != nil {
+		return err
+	}
+
+	if isUsingWebsocket {
+		fileTemplateGetAllHandler, err = os.ReadFile("template/GetAllHandlerWS.txt")
+		if err != nil {
+			return err
+		}
+
+		fileTemplateGetByHandler, err = os.ReadFile("template/GetByHandlerWS.txt")
+
+		if err != nil {
+			return err
+		}
+
+		fileTemplateHandlerPaging, err = os.ReadFile("template/GetByPagingHandlerWS.txt")
+		if err != nil {
+			return err
+		}
+
 	}
 
 	template := string(fileTemplate)
 	templateGetByHandler := string(fileTemplateGetByHandler)
 	templateHandlerConvert := string(fileTemplateHandlerConvert)
 	templatePaging := string(fileTemplateHandlerPaging)
+	templateGetallhandler := string(fileTemplateGetAllHandler)
 	getByHandler := ""
 
 	names := strings.Split(name, "")
@@ -806,6 +854,8 @@ func createHandler(items []string, name string, project string) error {
 	templateGetByHandler = strings.Replace(templateGetByHandler, "[nameUpper]", nameUpper, -1)
 	templateHandlerConvert = strings.Replace(templateHandlerConvert, "[nameUpper]", nameUpper, -1)
 	templatePaging = strings.Replace(templatePaging, "[nameUpper]", nameUpper, -1)
+	templateGetallhandler = strings.Replace(templateGetallhandler, "[nameUpper]", nameUpper, -1)
+	templateGetallhandler = strings.Replace(templateGetallhandler, "[name]", name, -1)
 
 	for i := 0; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
@@ -867,6 +917,18 @@ func createHandler(items []string, name string, project string) error {
 	template = strings.Replace(template, "[nameUpper]", nameUpper, -1)
 	template = strings.Replace(template, "[project]", project, -1)
 	template = strings.Replace(template, "[getByHandler]", getByHandler, -1)
+	template = strings.Replace(template, "[getAllHandler]", templateGetallhandler, -1)
+	if isUsingWebsocket {
+		template = strings.Replace(template, "[isWebsocket]", "\"github.com/gorilla/websocket\"", -1)
+		template = strings.Replace(template, "[webSocketItem1]", "upgrader websocket.Upgrader", -1)
+		template = strings.Replace(template, "[webSocketItem2]", ", upgrader websocket.Upgrader", -1)
+		template = strings.Replace(template, "[webSocketItem3]", ", upgrader", -1)
+	}
+	template = strings.Replace(template, "[isWebsocket]", "", -1)
+	template = strings.Replace(template, "[webSocketItem1]", "", -1)
+	template = strings.Replace(template, "[webSocketItem2]", "", -1)
+	template = strings.Replace(template, "[webSocketItem3]", "", -1)
+
 	_, err = fmt.Fprintln(file, template)
 	if err != nil {
 		return err

@@ -9,14 +9,16 @@ import (
 	"[project]/service"
 
 	"github.com/gin-gonic/gin"
+	[isWebsocket]
 )
 
 type [name]Handler struct {
 	[name]Service service.[nameUpper]Service
+	[webSocketItem1]
 }
 
-func New[nameUpper]Handler([name]Service service.[nameUpper]Service) *[name]Handler {
-	return &[name]Handler{[name]Service}
+func New[nameUpper]Handler([name]Service service.[nameUpper]Service[webSocketItem2]) *[name]Handler {
+	return &[name]Handler{[name]Service[webSocketItem3]}
 }
 
 func (h *[name]Handler) Create[nameUpper](c *gin.Context) {
@@ -102,33 +104,7 @@ func (h *[name]Handler) Edit[nameUpper](c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
-
-	var paging helper.Paging
-
-	err := c.ShouldBindJSON(&paging)
-	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-
-		response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	[name]s, err := h.[name]Service.GetAll[nameUpper](helper.SetPagingDefault(paging))
-
-	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-
-		response := helper.APIResponse("Get All [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
-
-	response := helper.APIResponse("Get All [nameUpper] Success", http.StatusOK, "Success", [name]s)
-
-	c.JSON(http.StatusOK, response)
-}
+[getAllHandler]
 
 [getByHandler]
 
