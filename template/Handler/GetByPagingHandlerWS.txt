@@ -1,11 +1,11 @@
     var paging helper.Paging
 
-		go conn.ReadJSON(&paging)
+		err = conn.ReadJSON(&paging)
 
 		if err != nil {
 			errorMessage := gin.H{"errors": err.Error()}
 
 			response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-			go conn.WriteJSON(response)
+			conn.WriteJSON(response)
 			break
 		}

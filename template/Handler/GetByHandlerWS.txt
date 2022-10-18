@@ -26,7 +26,7 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 			errorMessage := gin.H{"errors": err.Error()}
 
 			response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-			go conn.WriteJSON(response)
+			conn.WriteJSON(response)
 			break
 		}
 
@@ -39,7 +39,7 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 				errorMessage := gin.H{"errors": err.Error()}
 
 				response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-				go conn.WriteJSON(response)
+				conn.WriteJSON(response)
 				break
 			}
 		} else {
@@ -51,7 +51,7 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 						errorMessage := gin.H{"errors": err.Error()}
 
 						response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-						go conn.WriteJSON(response)
+						conn.WriteJSON(response)
 						break
 					}
 				}

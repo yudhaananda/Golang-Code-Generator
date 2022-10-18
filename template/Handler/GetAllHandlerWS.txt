@@ -16,12 +16,12 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 
 	for {
 
-		go conn.ReadJSON(&paging)
+		err = conn.ReadJSON(&paging)
 		if err != nil {
 			errorMessage := gin.H{"errors": err.Error()}
 
 			response := helper.APIResponse("Get All [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-			go conn.WriteJSON(response)
+			conn.WriteJSON(response)
 			break
 		}
 
@@ -31,7 +31,7 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 			errorMessage := gin.H{"errors": err.Error()}
 
 			response := helper.APIResponse("Get All [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-			go conn.WriteJSON(response)
+			conn.WriteJSON(response)
 			break
 		}
 
@@ -44,7 +44,7 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 				errorMessage := gin.H{"errors": err.Error()}
 
 				response := helper.APIResponse("Get All [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-				go conn.WriteJSON(response)
+				conn.WriteJSON(response)
 				break
 			}
 		} else {
@@ -56,7 +56,7 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 						errorMessage := gin.H{"errors": err.Error()}
 
 						response := helper.APIResponse("Get All [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-						go conn.WriteJSON(response)
+						conn.WriteJSON(response)
 						break
 					}
 				}
