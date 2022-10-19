@@ -15,14 +15,8 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 
 	var [name]s []entity.[nameUpper]
 
-	go func(){
-		defer conn.Close()
-		for {
-
-			[paging]
-
-		}
-	}() 
+	[paging]
+	
 	go func(){
 		defer conn.Close()
 		for {

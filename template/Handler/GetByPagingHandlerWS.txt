@@ -1,4 +1,6 @@
-    var paging helper.Paging
+go func(){
+	defer conn.Close()
+	for {
 
 		err = conn.ReadJSON(&paging)
 
@@ -9,3 +11,6 @@
 			conn.WriteJSON(response)
 			break
 		}
+
+	}
+}() 
