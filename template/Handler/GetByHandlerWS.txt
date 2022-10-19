@@ -1,5 +1,6 @@
 func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 	[item] := c.Param("[item]")
+	[pagingParam]
 
     [convert]
 
@@ -12,29 +13,22 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 		return
 	}
 
-	defer conn.Close()
-
 	var [name]s []entity.[nameUpper]
 
-	for {
+	go func(){
+		defer conn.Close()
+		for {
 
-		[paging]
+			[paging]
 
-		temp[nameUpper]s, err := h.[name]Service.Get[nameUpper]By[itemUpper]([itemParam])
-
-		if err != nil {
-			errorMessage := gin.H{"errors": err.Error()}
-
-			response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-			conn.WriteJSON(response)
-			break
 		}
+	}() 
+	go func(){
+		defer conn.Close()
+		for {
 
-		response := helper.APIResponse("Get [nameUpper] Success", http.StatusOK, "Success", temp[nameUpper]s)
+			temp[nameUpper]s, err := h.[name]Service.Get[nameUpper]By[itemUpper]([itemParam])
 
-		if len(temp[nameUpper]s) != len([name]s) {
-			err = conn.WriteJSON(response)
-			[name]s = temp[nameUpper]s
 			if err != nil {
 				errorMessage := gin.H{"errors": err.Error()}
 
@@ -42,20 +36,34 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 				conn.WriteJSON(response)
 				break
 			}
-		} else {
-			for i := 0; i < len([name]s); i++ {
-				if [name]s[i].UpdatedDate != temp[nameUpper]s[i].UpdatedDate || [name]s[i].CreatedDate != temp[nameUpper]s[i].CreatedDate {
-					err = conn.WriteJSON(response)
-					[name]s = temp[nameUpper]s
-					if err != nil {
-						errorMessage := gin.H{"errors": err.Error()}
 
-						response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-						conn.WriteJSON(response)
-						break
+			response := helper.APIResponse("Get [nameUpper] Success", http.StatusOK, "Success", temp[nameUpper]s)
+
+			if len(temp[nameUpper]s) != len([name]s) {
+				err = conn.WriteJSON(response)
+				[name]s = temp[nameUpper]s
+				if err != nil {
+					errorMessage := gin.H{"errors": err.Error()}
+
+					response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+					conn.WriteJSON(response)
+					break
+				}
+			} else {
+				for i := 0; i < len([name]s); i++ {
+					if [name]s[i].UpdatedDate != temp[nameUpper]s[i].UpdatedDate || [name]s[i].CreatedDate != temp[nameUpper]s[i].CreatedDate {
+						err = conn.WriteJSON(response)
+						[name]s = temp[nameUpper]s
+						if err != nil {
+							errorMessage := gin.H{"errors": err.Error()}
+
+							response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+							conn.WriteJSON(response)
+							break
+						}
 					}
 				}
 			}
 		}
-	}
+	}()
 }

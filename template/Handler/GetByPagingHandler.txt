@@ -1,10 +1,8 @@
-var paging helper.Paging
+err := c.ShouldBindJSON(&paging)
+		if err != nil {
+			errorMessage := gin.H{"errors": err.Error()}
 
-	err := c.ShouldBindJSON(&paging)
-	if err != nil {
-		errorMessage := gin.H{"errors": err.Error()}
-
-		response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
+			response := helper.APIResponse("Get [nameUpper] Failed", http.StatusUnprocessableEntity, "Failed", errorMessage)
+			c.JSON(http.StatusUnprocessableEntity, response)
+			return
+		}

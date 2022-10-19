@@ -872,13 +872,16 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 			paging := ""
 			pagingItem := ""
 			tempGetByHandler := ""
+			pagingParam := ""
 			if itemLower != "password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
 				if itemLower != "id" {
 					pagingItem = ", helper.SetPagingDefault(paging)"
 					paging = templatePaging
-
+					pagingParam = "var paging helper.Paging"
 				}
 				tempGetByHandler = strings.Replace(templateGetByHandler, "[item]", itemLower, -1)
+				tempGetByHandler = strings.Replace(tempGetByHandler, "[pagingParam]", pagingParam, -1)
+
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[type]", type_, -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[paging]", paging, -1)
