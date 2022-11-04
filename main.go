@@ -16,7 +16,12 @@ import (
 
 func main() {
 	router := gin.Default()
-
+	router.Use(func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		ctx.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		ctx.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+	})
 	router.GET("/", func(ctx *gin.Context) {
 		html, err := os.ReadFile("index.html")
 		if err != nil {
@@ -31,13 +36,23 @@ func main() {
 		}
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", png)
 	})
+	router.POST("/generateapi", func(ctx *gin.Context) {
+		var obj ViewModel
+		err := ctx.ShouldBindJSON(obj)
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+			return
+		}
+		result, err := process(obj.Entity, obj.ProjectName, obj.Relation, obj.Database, obj.IsUsingWebSocket)
+		if err != nil {
+			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+			return
+		}
+		ctx.Data(http.StatusOK, "Application/zip", result)
+	})
 	router.POST("/generate", func(ctx *gin.Context) {
-		ctx.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		ctx.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		ctx.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		ctx.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
-		content, err := ctx.FormFile("file")
 
+		content, err := ctx.FormFile("file")
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
