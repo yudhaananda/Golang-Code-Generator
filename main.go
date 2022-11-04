@@ -40,12 +40,12 @@ func main() {
 		var obj ViewModel
 		err := ctx.ShouldBindJSON(obj)
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+			ctx.JSON(http.StatusBadGateway, err.Error())
 			return
 		}
 		result, err := process(obj.Entity, obj.ProjectName, obj.Relation, obj.Database, obj.IsUsingWebSocket)
 		if err != nil {
-			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
+			ctx.JSON(http.StatusBadGateway, err.Error())
 			return
 		}
 		ctx.Data(http.StatusOK, "Application/zip", result)
