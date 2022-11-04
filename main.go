@@ -38,6 +38,9 @@ func main() {
 	})
 	router.POST("/generateapi", func(ctx *gin.Context) {
 		var obj ViewModel
+		obj.Entity = make(map[string][]string)
+		obj.Database = make(map[string]string)
+		obj.Relation = make([]map[string]string, 0)
 		err := ctx.ShouldBindJSON(obj)
 		if err != nil {
 			ctx.JSON(http.StatusBadGateway, err.Error())
