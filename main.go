@@ -41,7 +41,7 @@ func main() {
 		obj.Entity = make(map[string][]string)
 		obj.Database = make(map[string]string)
 		obj.Relation = make([]map[string]string, 0)
-		err := ctx.ShouldBindJSON(obj)
+		err := ctx.ShouldBindJSON(&obj)
 		if err != nil {
 			ctx.JSON(http.StatusBadGateway, err.Error())
 			return
