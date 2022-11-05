@@ -51,7 +51,7 @@ func main() {
 			ctx.JSON(http.StatusBadGateway, err.Error())
 			return
 		}
-		ctx.JSON(http.StatusOK, result)
+		ctx.Data(http.StatusOK, "Application/zip", result)
 	})
 	router.POST("/generate", func(ctx *gin.Context) {
 
