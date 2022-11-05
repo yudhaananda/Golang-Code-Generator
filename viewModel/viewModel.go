@@ -1,4 +1,4 @@
-package main
+package viewModel
 
 type ViewModel struct {
 	ProjectName      string              `json:"projectName"`

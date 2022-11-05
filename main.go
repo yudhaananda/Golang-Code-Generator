@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"codegen/viewModel"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,7 +38,7 @@ func main() {
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", png)
 	})
 	router.POST("/generateapi", func(ctx *gin.Context) {
-		var obj ViewModel
+		var obj viewModel.ViewModel
 		obj.Entity = make(map[string][]string)
 		obj.Database = make(map[string]string)
 		obj.Relation = make([]map[string]string, 0)
@@ -84,7 +85,7 @@ func main() {
 			return
 		}
 
-		var jsonContent map[string]interface{}
+		var jsonContent viewModel.ViewModel
 		err = json.Unmarshal(data, &jsonContent)
 
 		if err != nil {
@@ -92,52 +93,7 @@ func main() {
 			return
 		}
 
-		objs := map[string][]string{}
-
-		relation := []map[string]string{}
-
-		database := map[string]string{}
-
-		projectObject := jsonContent["projectName"]
-		entity := jsonContent["entity"]
-		relationObject := jsonContent["relation"]
-		databaseObject := jsonContent["database"]
-		isUsingWebsocketObject := jsonContent["isUsingWebsocket"]
-
-		project := ""
-		if projectObject != nil {
-			project = strings.ToLower(fmt.Sprintf("%v", projectObject))
-		}
-
-		isUsingWebsocket := false
-		if isUsingWebsocketObject != nil {
-			isUsingWebsocket = isUsingWebsocketObject.(bool)
-		}
-
-		for key, val := range databaseObject.(map[string]interface{}) {
-			database[key] = val.(string)
-		}
-
-		if relationObject != nil {
-			for _, obj := range relationObject.([]interface{}) {
-				temp := map[string]string{}
-				for key, val := range obj.(map[string]interface{}) {
-					temp[key] = val.(string)
-				}
-				relation = append(relation, temp)
-			}
-		}
-
-		if entity != nil {
-			for key, obj := range entity.(map[string]interface{}) {
-				temp := []string{}
-				for _, val := range obj.([]interface{}) {
-					temp = append(temp, val.(string))
-				}
-				objs[key] = temp
-			}
-		}
-		result, err := process(objs, project, relation, database, isUsingWebsocket)
+		result, err := process(jsonContent.Entity, jsonContent.ProjectName, jsonContent.Relation, jsonContent.Database, jsonContent.IsUsingWebSocket)
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
 			return
