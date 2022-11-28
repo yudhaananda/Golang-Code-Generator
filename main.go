@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -78,7 +77,7 @@ func main() {
 		}
 		defer file.Close()
 
-		data, err := ioutil.ReadAll(file)
+		data, err := io.ReadAll(file)
 
 		if err != nil {
 			ctx.Data(http.StatusBadGateway, "text/html; charset=utf-8", []byte(err.Error()))
@@ -237,7 +236,7 @@ func zipping(project string) ([]byte, error) {
 
 func addFiles(w *zip.Writer, basePath string) {
 	// Open the Directory
-	files, err := ioutil.ReadDir(basePath)
+	files, err := os.ReadDir(basePath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -245,7 +244,7 @@ func addFiles(w *zip.Writer, basePath string) {
 	for _, file := range files {
 		// fmt.Println(basePath + file.Name())
 		if !file.IsDir() {
-			dat, err := ioutil.ReadFile(basePath + file.Name())
+			dat, err := os.ReadFile(basePath + file.Name())
 			if err != nil {
 				fmt.Println(err)
 			}
