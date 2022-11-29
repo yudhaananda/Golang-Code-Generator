@@ -4,16 +4,13 @@ import (
 	"[project]/entity"
 )
 
-type UserFormatter struct {
+type AuthFormatter struct {
 	User  entity.User `json:"profile"`
 	Token string      `json:"token"`
 }
 
-func FormatUser(user entity.User, token string) UserFormatter {
-	formatter := UserFormatter{
-		User:  user,
-		Token: token,
-	}
-	formatter.User.Password = ""
-	return formatter
+func (f *AuthFormatter)Format(user entity.User, token string) {
+	f.User = user
+	f.Token = token
+	f.User.Password = ""
 }

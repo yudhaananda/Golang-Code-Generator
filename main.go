@@ -151,7 +151,7 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
-	err = createFormatter(project)
+	err = createAuthFormatter(project)
 	if err != nil {
 		return nil, err
 	}
@@ -513,7 +513,7 @@ func createJwtService(project string) error {
 	return nil
 }
 
-func createFormatter(project string) error {
+func createAuthFormatter(project string) error {
 	err := os.MkdirAll(project+"/formatter/", os.ModePerm)
 	if err != nil {
 		return err

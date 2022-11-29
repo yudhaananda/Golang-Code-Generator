@@ -53,7 +53,8 @@ func (h *authHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	formatter := formatter.FormatUser(newProfile, token)
+	formatter := formatter.AuthFormatter{}
+	formatter.Format(newProfile, token)
 
 	response := helper.APIResponse("account has been registered successfully", http.StatusOK, "success", formatter)
 	
@@ -95,7 +96,8 @@ func (h *authHandler) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := formatter.FormatUser(loggedinUser, token)
+	formatter := formatter.AuthFormatter{}
+	formatter.Format(loggedinUser, token)
 
 	response := helper.APIResponse("Logedin", http.StatusOK, "success", formatter)
 
