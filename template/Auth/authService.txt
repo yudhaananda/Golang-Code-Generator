@@ -27,7 +27,7 @@ func NewAuthService(userRepository repository.UserRepository) *authService {
 
 func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 
-	checkUser, err := s.userRepository.FindByUserName(input.UserName, helper.Paging{Page: 1, Take: 1, OrderBy: ""})
+	checkUser, _, err := s.userRepository.FindByUserName(input.UserName, helper.Paging{Page: 1, Take: 1, OrderBy: ""})
 
 	if err != nil {
 		return entity.User{}, errors.New("error find user")
@@ -57,7 +57,7 @@ func (s *authService) RegisterUser(input input.UserInput) (entity.User, error) {
 
 func (s *authService) Login(input input.LoginInput) (entity.User, error) {
 
-	users, err := s.userRepository.FindByUserName(input.UserName, helper.Paging{Page: 1, Take: 1, OrderBy: ""})
+	users, _, err := s.userRepository.FindByUserName(input.UserName, helper.Paging{Page: 1, Take: 1, OrderBy: ""})
 
 	if err != nil {
 		return entity.User{}, err

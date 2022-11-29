@@ -171,6 +171,10 @@ func process(objs map[string][]string, project string, relation []map[string]str
 	if err != nil {
 		return nil, err
 	}
+	err = createPaginatedItemsFormatter(project)
+	if err != nil {
+		return nil, err
+	}
 	err = createAuthMiddleware(project)
 	if err != nil {
 		return nil, err
@@ -366,6 +370,35 @@ func createApiListHtml(objs map[string][]string, project string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func createPaginatedItemsFormatter(project string) error {
+	err := os.MkdirAll(project+"/formatter/", os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(project + "/formatter/paginatedItemsFormatter.go")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	fileTemplate, err := os.ReadFile("template/Formatter/paginatedItemsFormatter.txt")
+
+	if err != nil {
+		return err
+	}
+
+	template := string(fileTemplate)
+
+	_, err = fmt.Fprintln(file, template)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -796,6 +829,11 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 		return err
 	}
 
+	filePaginatedResponse, err := os.ReadFile("template/Handler/paginatedResponse.txt")
+	if err != nil {
+		return err
+	}
+
 	if isUsingWebsocket {
 		fileTemplateGetAllHandler, err = os.ReadFile("template/Handler/GetAllHandlerWS.txt")
 		if err != nil {
@@ -813,6 +851,11 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 			return err
 		}
 
+		filePaginatedResponse, err = os.ReadFile("template/Handler/paginatedResponseWS.txt")
+		if err != nil {
+			return err
+		}
+
 	}
 
 	template := string(fileTemplate)
@@ -820,6 +863,7 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 	templateHandlerConvert := string(fileTemplateHandlerConvert)
 	templatePaging := string(fileTemplateHandlerPaging)
 	templateGetallhandler := string(fileTemplateGetAllHandler)
+	templatePaginatedResponse := string(filePaginatedResponse)
 	getByHandler := ""
 
 	names := strings.Split(name, "")
@@ -832,6 +876,8 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 	templatePaging = strings.Replace(templatePaging, "[nameUpper]", nameUpper, -1)
 	templateGetallhandler = strings.Replace(templateGetallhandler, "[nameUpper]", nameUpper, -1)
 	templateGetallhandler = strings.Replace(templateGetallhandler, "[name]", name, -1)
+	templatePaginatedResponse = strings.Replace(templatePaginatedResponse, "[name]", name, -1)
+	templatePaginatedResponse = strings.Replace(templatePaginatedResponse, "[nameUpper]", nameUpper, -1)
 
 	for i := 0; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
@@ -847,13 +893,20 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 			}
 			paging := ""
 			pagingItem := ""
+			notId := ""
 			tempGetByHandler := ""
+			paginatedResponse := "result := " + name
+			if isUsingWebsocket {
+				paginatedResponse = "result := temp" + nameUpper + "s"
+			}
 			pagingParam := ""
 			if itemLower != "password" && !strings.Contains(strings.Split(items[i], " ")[1], "time.Time") {
 				if itemLower != "id" {
 					pagingItem = ", helper.SetPagingDefault(paging)"
 					paging = templatePaging
 					pagingParam = "var paging helper.Paging"
+					notId = ", count"
+					paginatedResponse = templatePaginatedResponse
 				}
 				tempGetByHandler = strings.Replace(templateGetByHandler, "[item]", itemLower, -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[pagingParam]", pagingParam, -1)
@@ -861,6 +914,8 @@ func createHandler(items []string, name string, project string, isUsingWebsocket
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[type]", type_, -1)
 				tempGetByHandler = strings.Replace(tempGetByHandler, "[paging]", paging, -1)
+				tempGetByHandler = strings.Replace(tempGetByHandler, "[notId]", notId, -1)
+				tempGetByHandler = strings.Replace(tempGetByHandler, "[paginatedResponse]", paginatedResponse, -1)
 				if type_ == "String" {
 					tempGetByHandler = strings.Replace(tempGetByHandler, "[itemParam]", itemLower+pagingItem, -1)
 					tempGetByHandler = strings.Replace(tempGetByHandler, "[convert]", "", -1)
@@ -1048,22 +1103,29 @@ func createService(items []string, name string, project string) error {
 			itemLower := strings.Join(itemSplit, "")
 			tempGetByServiceMethod := ""
 			tempGetByService := ""
+			itemReturn := "[]entity." + nameUpper + ", error"
 			pagingParam := ""
 			pagingItem := ""
+			notId := ""
 
 			if itemLower != "password" {
 
 				if itemLower != "id" {
 					pagingParam = ", paging helper.Paging"
 					pagingItem = ", paging"
+					itemReturn = "[]entity." + nameUpper + ", int, error"
+					notId = ", count"
 				}
 				tempGetByServiceMethod = strings.Replace(templateGetByServiceMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
 				tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[item]", itemLower+pagingItem, -1)
+				tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[itemReturn]", itemReturn, -1)
+				tempGetByServiceMethod = strings.Replace(tempGetByServiceMethod, "[notId]", notId, -1)
 				getByServiceMethod += tempGetByServiceMethod + "\n"
 
 				tempGetByService = strings.Replace(templateGetByService, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempGetByService = strings.Replace(tempGetByService, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
+				tempGetByService = strings.Replace(tempGetByService, "[itemReturn]", itemReturn, -1)
 				getByService += tempGetByService + "\n"
 			}
 		}
@@ -1122,9 +1184,16 @@ func createRepository(items []string, name string, project string, itemCompares 
 		return err
 	}
 
+	fileTemplateFindByCount, err := os.ReadFile("template/Repository/FindByRepoCount.txt")
+
+	if err != nil {
+		return err
+	}
+
 	template := string(fileTemplate)
 	templateFindByMethod := string(fileTemplateFindByRepoMethod)
 	templateFindBy := string(fileTemplateFindByRepo)
+	templateFindByCount := string(fileTemplateFindByCount)
 	findByMethod := ""
 	findBy := ""
 
@@ -1144,6 +1213,7 @@ func createRepository(items []string, name string, project string, itemCompares 
 	templateFindByMethod = strings.Replace(templateFindByMethod, "[nameUpper]", nameUpper, -1)
 	templateFindByMethod = strings.Replace(templateFindByMethod, "[preload]", preload, -1)
 	templateFindBy = strings.Replace(templateFindBy, "[nameUpper]", nameUpper, -1)
+	templateFindByCount = strings.Replace(templateFindByCount, "[name]", name, -1)
 
 	for i := 0; i < len(items)-6; i++ {
 		if len(strings.Split(items[i], " ")) > 1 {
@@ -1159,24 +1229,36 @@ func createRepository(items []string, name string, project string, itemCompares 
 			item_ := strings.Join(itemSplit, "")
 			tempFindByMethod := ""
 			tempFindBy := ""
+			tempFindByCount := ""
 			pagingParam := ""
 			paging := ""
+			returnNil := name
+			itemReturn := "[]entity." + nameUpper + ", error"
 
 			if itemLower != "password" {
 				if itemLower != "id" {
 					pagingParam = ", paging helper.Paging"
 					paging = ".Offset((paging.Page - 1) * paging.Take).Limit(paging.Take).Order(paging.OrderBy)"
+					itemReturn = "[]entity." + nameUpper + ", int, error"
+					tempFindByCount = strings.Replace(templateFindByCount, "[item]", itemLower, -1)
+					tempFindByCount = strings.Replace(tempFindByCount, "[item_]", item_, -1)
+					returnNil = name + ", 0"
 				}
 				tempFindByMethod = strings.Replace(templateFindByMethod, "[item]", itemLower, -1)
 				tempFindByMethod = strings.Replace(tempFindByMethod, "[item_]", item_, -1)
 				tempFindByMethod = strings.Replace(tempFindByMethod, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempFindByMethod = strings.Replace(tempFindByMethod, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
+				tempFindByMethod = strings.Replace(tempFindByMethod, "[itemReturn]", itemReturn, -1)
 				tempFindByMethod = strings.Replace(tempFindByMethod, "[paging]", paging, -1)
+				tempFindByMethod = strings.Replace(tempFindByMethod, "[countItem]", tempFindByCount, -1)
+				tempFindByMethod = strings.Replace(tempFindByMethod, "[returnErr]", returnNil+", err", -1)
+				tempFindByMethod = strings.Replace(tempFindByMethod, "[returnNil]", returnNil+", nil", -1)
 				findByMethod += tempFindByMethod
 
 				tempFindBy = strings.Replace(templateFindBy, "[itemUpper]", strings.Split(items[i], " ")[0], -1)
 				tempFindBy = strings.Replace(tempFindBy, "[item]", itemLower, -1)
 				tempFindBy = strings.Replace(tempFindBy, "[itemParam]", itemLower+" "+strings.Split(items[i], " ")[1]+pagingParam, -1)
+				tempFindBy = strings.Replace(tempFindBy, "[itemReturn]", itemReturn, -1)
 
 				findBy += tempFindBy + "\n"
 			}

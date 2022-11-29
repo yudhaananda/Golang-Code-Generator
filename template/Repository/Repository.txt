@@ -10,7 +10,7 @@ import (
 type [nameUpper]Repository interface {
 	Save([name] entity.[nameUpper]) (entity.[nameUpper], error)
 	Edit([name] entity.[nameUpper]) (entity.[nameUpper], error)
-[findBy]	FindAll(paging helper.Paging) ([]entity.[nameUpper], error)
+[findBy]	FindAll(paging helper.Paging) ([]entity.[nameUpper], int, error)
 }
 
 type [name]Repository struct {
@@ -43,14 +43,19 @@ func (r *[name]Repository) Edit([name] entity.[nameUpper]) (entity.[nameUpper], 
 
 [findByMethod]
 
-func (r *[name]Repository) FindAll(paging helper.Paging) ([]entity.[nameUpper], error) {
+func (r *[name]Repository) FindAll(paging helper.Paging) ([]entity.[nameUpper], int, error) {
 	var [name]s []entity.[nameUpper]
+	var count int64
 
-	err := r.db.Where("deleted_by = ?", "").Offset((paging.Page - 1) * paging.Take).Limit(paging.Take).Order(paging.OrderBy)[preload].Find(&[name]s).Error
-
+	err := r.db.Where("deleted_by = ?", "").Model(&[name]s).Count(&count).Error
 	if err != nil {
-		return [name]s, err
+		return [name]s, int(count), err
 	}
 
-	return [name]s, nil
+	err = r.db.Where("deleted_by = ?", "").Offset((paging.Page - 1) * paging.Take).Limit(paging.Take).Order(paging.OrderBy)[preload].Find(&[name]s).Error
+	if err != nil {
+		return [name]s, int(count), err
+	}
+
+	return [name]s, int(count), nil
 }

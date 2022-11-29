@@ -1,12 +1,13 @@
 
-func (r *[name]Repository) FindBy[itemUpper]([itemParam]) ([]entity.[nameUpper], error) {
+func (r *[name]Repository) FindBy[itemUpper]([itemParam]) ([itemReturn]) {
 	var [name] []entity.[nameUpper]
 
 	err := r.db.Where("[item_] = ? AND deleted_by = ?", [item], "")[paging][preload].Find(&[name]).Error
-
 	if err != nil {
-		return [name], err
+		return [returnErr]
 	}
 
-	return [name], nil
+	[countItem]
+
+	return [returnNil]
 }

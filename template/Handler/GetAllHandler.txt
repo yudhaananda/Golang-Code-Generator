@@ -11,7 +11,7 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 		return
 	}
 
-	[name]s, err := h.[name]Service.GetAll[nameUpper](helper.SetPagingDefault(paging))
+	[name]s, count, err := h.[name]Service.GetAll[nameUpper](helper.SetPagingDefault(paging))
 
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
@@ -21,7 +21,10 @@ func (h *[name]Handler) GetAll[nameUpper]s(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Get All [nameUpper] Success", http.StatusOK, "Success", [name]s)
+	result := formatter.PaginatedItemsFormatter{}
+	result.Format(paging.Page, float64(len([name]s)), float64(count), [name]s)
+
+	response := helper.APIResponse("Get All [nameUpper] Success", http.StatusOK, "Success", result)
 
 	c.JSON(http.StatusOK, response)
 }

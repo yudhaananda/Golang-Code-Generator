@@ -1,14 +1,14 @@
-func (s *[name]Service) Get[nameUpper]By[itemUpper]([itemParam]) ([]entity.[nameUpper], error) {
+func (s *[name]Service) Get[nameUpper]By[itemUpper]([itemParam]) ([itemReturn]) {
 
-	[name], err := s.[name]Repository.FindBy[itemUpper]([item])
+	[name][notId], err := s.[name]Repository.FindBy[itemUpper]([item])
 
 	if err != nil {
-		return [name], err
+		return [name][notId], err
 	}
 
 	if len([name]) == 0 {
-		return [name], errors.New("[name] not found")
+		return [name][notId], errors.New("[name] not found")
 	}
 
-	return [name], nil
+	return [name][notId], nil
 }

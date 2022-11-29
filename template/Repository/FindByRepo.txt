@@ -1,1 +1,1 @@
-    FindBy[itemUpper]([itemParam]) ([]entity.[nameUpper], error)
+    FindBy[itemUpper]([itemParam]) ([itemReturn])

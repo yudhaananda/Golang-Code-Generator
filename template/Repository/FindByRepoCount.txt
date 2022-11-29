@@ -1,0 +1,6 @@
+var count int64
+
+	err = r.db.Where("[item_] = ? AND deleted_by = ?", [item], "").Model(&[name]).Count(&count).Error
+	if err != nil {
+		return [name], int(count), err
+	}

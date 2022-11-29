@@ -21,7 +21,7 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 		defer conn.Close()
 		for {
 
-			temp[nameUpper]s, err := h.[name]Service.Get[nameUpper]By[itemUpper]([itemParam])
+			temp[nameUpper]s[notId], err := h.[name]Service.Get[nameUpper]By[itemUpper]([itemParam])
 
 			if err != nil {
 				errorMessage := gin.H{"errors": err.Error()}
@@ -31,7 +31,9 @@ func (h *[name]Handler) Get[nameUpper]By[itemUpper](c *gin.Context) {
 				break
 			}
 
-			response := helper.APIResponse("Get [nameUpper] Success", http.StatusOK, "Success", temp[nameUpper]s)
+			[paginatedResponse]
+			
+			response := helper.APIResponse("Get [nameUpper] Success", http.StatusOK, "Success", result)
 
 			if len(temp[nameUpper]s) != len([name]s) {
 				err = conn.WriteJSON(response)

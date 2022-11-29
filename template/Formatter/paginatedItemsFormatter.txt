@@ -1,0 +1,23 @@
+package formatter
+
+type PaginatedItemsFormatter struct {
+	Data      interface{}
+	PageIndex int
+	PageSize  int
+	DataCount int
+	PageCount int
+}
+
+func (f *PaginatedItemsFormatter) Format(pageIndex int, pageSize, count float64, data interface{}) {
+	f.Data = data
+	f.PageIndex = pageIndex
+	f.DataCount = int(count)
+	f.PageSize = int(pageSize)
+	if pageSize > 0 {
+		temp := count / pageSize
+		if temp > float64(int(temp)) {
+			temp++
+		}
+		f.PageCount = int(temp)
+	}
+}

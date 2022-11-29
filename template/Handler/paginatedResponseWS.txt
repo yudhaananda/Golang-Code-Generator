@@ -1,0 +1,2 @@
+result := formatter.PaginatedItemsFormatter{}
+			result.Format(paging.Page, float64(len(temp[nameUpper]s)), float64(count), temp[nameUpper]s)
